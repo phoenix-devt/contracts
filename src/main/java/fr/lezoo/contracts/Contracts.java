@@ -16,7 +16,6 @@ import java.util.logging.Level;
 public class Contracts extends JavaPlugin {
     public static Contracts plugin;
 
-
     public Economy economy;
     public PlayerManager playerManager = new PlayerManager();
     public PlaceholderParser placeholderParser = new DefaultPlaceholderParser();
@@ -48,7 +47,6 @@ public class Contracts extends JavaPlugin {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     @Override
@@ -56,10 +54,8 @@ public class Contracts extends JavaPlugin {
         plugin = this;
     }
 
-
     @Override
     public void onDisable() {
 
     }
-
 }
