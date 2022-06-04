@@ -2,12 +2,14 @@ package fr.lezoo.contracts;
 
 import fr.lezoo.contracts.compat.placeholder.DefaultPlaceholderParser;
 import fr.lezoo.contracts.compat.placeholder.PlaceholderParser;
-import fr.lezoo.contracts.manager.PlayerManager;
+import fr.lezoo.contracts.manager.ConfigManager;
+import fr.lezoo.contracts.manager.ContractManager;
+import fr.lezoo.contracts.manager.PlayerDataManager;
+import fr.lezoo.contracts.manager.ReviewManager;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
 import org.bukkit.plugin.RegisteredServiceProvider;
-import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.reflect.Field;
@@ -18,8 +20,12 @@ public class Contracts extends JavaPlugin {
 
 
     public Economy economy;
-    public PlayerManager playerManager = new PlayerManager();
-    public PlaceholderParser placeholderParser = new DefaultPlaceholderParser();
+
+    public final ConfigManager configManager=new ConfigManager();
+    public final PlayerDataManager playerManager = new PlayerDataManager();
+    public final ContractManager contractManager= new ContractManager();
+    public final ReviewManager reviewManager= new ReviewManager();
+    public final PlaceholderParser placeholderParser = new DefaultPlaceholderParser();
 
     @Override
     public void onEnable() {
@@ -37,7 +43,7 @@ public class Contracts extends JavaPlugin {
         }
 
         //Save the commands
-        Field field = null;
+
         try {
             Field bukkitCommandMap = Bukkit.getServer().getClass().getField("commandMap");
             bukkitCommandMap.setAccessible(true);
@@ -49,6 +55,14 @@ public class Contracts extends JavaPlugin {
             e.printStackTrace();
         }
 
+
+        //Load manager (the order is important: player must be loaded at the end)
+        configManager.load();
+        contractManager.load();
+        reviewManager.load();
+        playerManager.load();
+
+
     }
 
     @Override
@@ -59,6 +73,12 @@ public class Contracts extends JavaPlugin {
 
     @Override
     public void onDisable() {
+
+
+        //Save the managers
+        contractManager.save(true);
+        playerManager.save(true);
+        reviewManager.save(true);
 
     }
 

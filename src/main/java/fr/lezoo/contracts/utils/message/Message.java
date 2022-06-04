@@ -9,35 +9,12 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum Message {
-    NOT_ENOUGH_MONEY("&cYou don't have enough money: you need ${left} more"),
-    BUY_SHARES(new SoundReader(Sound.ENTITY_PLAYER_LEVELUP, 1, 2), "&eYou bought {shares} shares from {name} for ${price}."),
-    SELL_SHARES(new SoundReader(Sound.ENTITY_PLAYER_LEVELUP, 1, 2), "&eYou shorted {shares} shares from {name} for ${price}."),
-    CLOSE_SHARES(new SoundReader(Sound.ENTITY_PLAYER_LEVELUP, 1, 2), "&eYou closed {shares} shares from {name} for a final gain of ${gain}"),
-    GET_SHARE_PAPER(new SoundReader(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1, 2), "&eYou virtually closed your order and got an order paper for {shares} shares of {name}."),
-    CLAIM_SHARE_PAPER(new SoundReader(Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1, 2), "&eYou claimed {shares} shares of {name} for a total current value of ${value}."),
-    CLAIM_DIVIDENDS(new SoundReader(Sound.ENTITY_PLAYER_LEVELUP, 1, 2), "&eYou successfully redeemed &f${amount} &efrom your dividends."),
-    NO_DIVIDENDS_TO_CLAIM("&cYou don't have any dividends to claim."),
-    MARKET_CLOSING("&cThe stock market is closed for now."),
-
-    // Interaction with display boards
-    SET_AMOUNT_INFO("", "&e* Amount: {amount} (Click to set)"),
-    SET_AMOUNT_ASK(new SoundReader(Sound.ENTITY_PLAYER_LEVELUP, 1, 2), "", "&eWrite in the chat the amount of shares you want to buy/sell"),
-    SET_LEVERAGE_INFO("&e* Leverage: {leverage} (Click to set)"),
-    SET_LEVERAGE_ASK(new SoundReader(Sound.ENTITY_PLAYER_LEVELUP, 1, 2), "", "&eWrite in the chat the leverage you want to have"),
-    SET_MIN_PRICE_INFO("&e* Min Price: {min-price} (Click to set)"),
-    SET_MIN_PRICE_ASK(new SoundReader(Sound.ENTITY_PLAYER_LEVELUP, 1, 2), "", "&eWrite in the chat the min-price you want your share to automatically close at"),
-    SET_MAX_PRICE_INFO("&e* Max Price: {max-price} (Click to set)", ""),
-    SET_MAX_PRICE_ASK(new SoundReader(Sound.ENTITY_PLAYER_LEVELUP, 1, 2), "", "&eWrite in the chat the max-price you want your share to automatically close at"),
-
-    BUY_CUSTOM_ASK(new SoundReader(Sound.ENTITY_PLAYER_LEVELUP, 1, 2), "", "&eWrite in the chat the amount of shares you would like to buy."),
-    SELL_CUSTOM_ASK(new SoundReader(Sound.ENTITY_PLAYER_LEVELUP, 1, 2), "", "&eWrite in the chat the amount of shares you would like to short."),
-    NOT_VALID_NUMBER("&c{input} is not a valid number."),
-    NO_ORDER("You don't have any order for {stock-name}"),
-    NO_AMOUNT("You didn't specify the amount of shares you wanted for {stock-name}"),
-    NOT_VALID_AMOUNT("&c{input} is not a valid amount."),
-    NOT_VALID_MIN_PRICE("&c{input} is not a valid min price."),
-    NOT_VALID_MAX_PRICE("&c{input} is not a valid max price."),
-    NOT_VALID_LEVERAGE("&cThe leverage must be a positive number"),
+    SET_NOTATION_INFO("&e(Click to Change) Notation: {notation}"),
+    SET_COMMENT_INFO("&e(Click to Change) Comment: {comment}"),
+    SET_NOTATION_ASK("&eWrite an integer between 1 and 5 for the notation."),
+    SET_COMMENT_ASK("&eWrite the comment you want to leave, send a blank message to stop the redaction."),
+    COMMENT_TOO_LONG("&cThe comment you tried to post is too long, you must shorten it."),
+    NOT_VALID_NOTATION("&c{input} is not a valid notation, it must be an integer."),
     NOT_ENOUGH_PERMISSIONS("&cYou don't have enough permissions."),
     ;
 

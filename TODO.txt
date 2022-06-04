@@ -1,0 +1,8 @@
+//TODO:
+-What happens when a player doesn't have the money to refund (negative amount/ middleman), roblem create infinte money
+
+
+-How to create a contract
+-Contract Viewer
+-Review Viewer
+-Contract market place viewer

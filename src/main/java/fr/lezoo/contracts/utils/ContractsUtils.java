@@ -6,7 +6,7 @@ public class ContractsUtils {
 
 
 
-    public String ymlName(String str) {
+    public static String ymlName(String str) {
         return str.toLowerCase().replace("_","-").replace(" ","-");
     }
     public static String enumName(String str) {
