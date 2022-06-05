@@ -22,19 +22,30 @@ public abstract class InventoryItem<T extends GeneratedInventory> {
     private final List<String> lore;
     private final int modelData;
     private final boolean hideFlags;
+    protected final InventoryItem parent;
 
-    public InventoryItem(ConfigurationSection config) {
+
+    public InventoryItem(InventoryItem parent, ConfigurationSection config,Material material) {
         this.id = config.getName();
         this.function = config.getString("function", "").toLowerCase();
-
-        this.material = Material.valueOf(Objects.requireNonNull(config.getString("item"), "Could not find material name").toUpperCase().replace(" ", "_").replace("-", "_"));
+        this.material = material!=null?material:config.getString("item") != null ? Material.valueOf(config.getString("item").toUpperCase().replace(" ", "_").replace("-", "_")) : Material.AIR;
         this.name = config.getString("name");
         this.lore = config.getStringList("lore");
         this.hideFlags = config.getBoolean("hide-flags");
         this.modelData = config.getInt("model-data");
-
+        this.parent=parent;
         config.getStringList("slots").forEach(str -> slots.add(Integer.parseInt(str)));
+
     }
+
+    public InventoryItem(InventoryItem<? extends GeneratedInventory> parent,ConfigurationSection config) {
+        this(parent,config,null);
+    }
+
+    public InventoryItem(ConfigurationSection config) {
+        this(null,config);
+        }
+
 
     public String getId() {
         return id;
@@ -112,14 +123,21 @@ public abstract class InventoryItem<T extends GeneratedInventory> {
      *            gives the template. This is the index of the item being displayed.
      * @return Item that will be displayed in the generated inventory
      */
-    public ItemStack getDisplayedItem(T inv, int n) {
 
+    public ItemStack getDisplayedItem(T inv, int n) {
+        return getDisplayedItem(inv, n, null);
+    }
+
+
+    public ItemStack getDisplayedItem(T inv, int n, Material specificMaterial) {
+        if (specificMaterial == null)
+            specificMaterial = material;
         // Support for AIR
-        if (material == Material.AIR)
+        if (specificMaterial == Material.AIR)
             return new ItemStack(Material.AIR);
 
         Placeholders placeholders = getPlaceholders(inv, n);
-        ItemStack item = new ItemStack(material);
+        ItemStack item = new ItemStack(specificMaterial);
         ItemMeta meta = item.getItemMeta();
 
         if (hasName())

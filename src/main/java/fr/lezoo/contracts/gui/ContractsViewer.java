@@ -25,12 +25,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.checkerframework.checker.units.qual.C;
 
-import javax.naming.Name;
 import java.util.*;
 import java.util.function.Function;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 public class ContractsViewer extends EditableInventory {
 
@@ -71,7 +70,6 @@ public class ContractsViewer extends EditableInventory {
             catch (Exception e) {
                 Contracts.plugin.getLogger().log(Level.WARNING,"Couldn't load material"+n+" for the change view item of the contracts gui");
             }
-
             ItemStack item = super.getDisplayedItem(inv, n,displayMaterial);
             ItemMeta meta = item.getItemMeta();
             PersistentDataContainer container = meta.getPersistentDataContainer();
@@ -98,6 +96,7 @@ public class ContractsViewer extends EditableInventory {
 
         public ContractItem(ConfigurationSection config) {
             super(config);
+            Material material=Material.valueOf(Objects.requireNonNull(ContractsUtils.enumToChatName(config.getString("item"))));
             ConfigurationSection waitingApproval = config.getConfigurationSection("waiting-approval");
             ConfigurationSection open = config.getConfigurationSection("open");
             ConfigurationSection disputed = config.getConfigurationSection("disputed");
@@ -106,10 +105,10 @@ public class ContractsViewer extends EditableInventory {
             Validate.notNull(open, "Could not load 'open' config");
             Validate.notNull(disputed, "Could not load 'disputed' config");
             Validate.notNull(ended, "Could not load 'ended' config");
-            waitingApprovalItem = new WaitingApprovalContractItem(this, waitingApproval);
-            openContractItem = new OpenContractItem(this, waitingApproval);
-            disputedContractItem = new DisputedContractItem(this, waitingApproval);
-            endedContractItem = new EndedContractItem(this, waitingApproval);
+            waitingApprovalItem = new WaitingApprovalContractItem(this, waitingApproval,material);
+            openContractItem = new OpenContractItem(this, waitingApproval,material);
+            disputedContractItem = new DisputedContractItem(this, waitingApproval,material);
+            endedContractItem = new EndedContractItem(this, waitingApproval,material);
         }
 
         @Override
@@ -143,66 +142,57 @@ public class ContractsViewer extends EditableInventory {
         public Placeholders getPlaceholders(ContractsInventory inv, int n) {
             Contract contract = inv.displayedContracts.get(inv.page + n);
             Placeholders holders = new Placeholders();
+            holders.register("name",contract.getName());
             holders.register("employee", contract.getEmployeeName());
             holders.register("employer", contract.getEmployeeName());
             holders.register("payment-amount", contract.getPaymentInfo().getAmount());
             holders.register("payment-type", ContractsUtils.enumToChatName(contract.getPaymentInfo().getType().toString()));
-            holders.register("start-since", ContractsUtils.timeSinceInHours(contract.getStartTime()) + " h");
-            holders.register("end-since", contract.isEnded() ? ContractsUtils.timeSinceInHours(contract.getStartTime()) + " h" : "Not Finished");
+            holders.register("start-since", ContractsUtils.timeSinceInHours(contract.getCreationTime()) + " h");
+            holders.register("approval-since", ContractsUtils.timeSinceInHours(contract.getApprovalTime()) + " h");
+            holders.register("end-since", contract.isEnded() ? ContractsUtils.timeSinceInHours(contract.getCreationTime()) + " h" : "Not Finished");
             return holders;
         }
     }
 
     public class WaitingApprovalContractItem extends InventoryItem<ContractsInventory> {
-        private final ContractItem contractItem;
 
-
-        public WaitingApprovalContractItem(ContractItem contractItem, ConfigurationSection config) {
-            super(config);
-            this.contractItem = contractItem;
+        public WaitingApprovalContractItem(ContractItem parent, ConfigurationSection config,Material material) {
+            super(parent, config,material);
         }
 
         @Override
         public Placeholders getPlaceholders(ContractsInventory inv, int n) {
-            return contractItem.getPlaceholders(inv, n);
+            return parent.getPlaceholders(inv, n);
         }
     }
 
     public class OpenContractItem extends InventoryItem<ContractsInventory> {
-        private final ContractItem contractItem;
 
-        public OpenContractItem(ContractItem contractItem, ConfigurationSection config) {
-            super(config);
-            this.contractItem = contractItem;
+        public OpenContractItem(ContractItem parent, ConfigurationSection config,Material material) {
+            super(parent, config,material);
         }
 
         @Override
         public Placeholders getPlaceholders(ContractsInventory inv, int n) {
-            return contractItem.getPlaceholders(inv, n);
+            return parent.getPlaceholders(inv, n);
         }
     }
 
     public class DisputedContractItem extends InventoryItem<ContractsInventory> {
-        private final ContractItem contractItem;
-
-
-        public DisputedContractItem(ContractItem contractItem, ConfigurationSection config) {
-            super(config);
-            this.contractItem = contractItem;
+        public DisputedContractItem(ContractItem parent, ConfigurationSection config,Material material) {
+            super(parent, config,material);
         }
 
         @Override
         public Placeholders getPlaceholders(ContractsInventory inv, int n) {
-            return contractItem.getPlaceholders(inv, n);
+            return parent.getPlaceholders(inv, n);
         }
     }
 
     public class EndedContractItem extends InventoryItem<ContractsInventory> {
-        private final ContractItem contractItem;
 
-        public EndedContractItem(ContractItem contractItem, ConfigurationSection config) {
-            super(config);
-            this.contractItem = contractItem;
+        public EndedContractItem(ContractItem parent, ConfigurationSection config,Material material) {
+            super(parent, config,material);
         }
 
         @Override
@@ -221,7 +211,7 @@ public class ContractsViewer extends EditableInventory {
 
         @Override
         public Placeholders getPlaceholders(ContractsInventory inv, int n) {
-            Placeholders holders = contractItem.getPlaceholders(inv, n);
+            Placeholders holders = parent.getPlaceholders(inv, n);
             Contract contract = inv.displayedContracts.get(inv.page + n);
             holders.register("can-review", inv.getPlayerData().canLeaveReview(contract));
             return holders;
@@ -259,7 +249,7 @@ public class ContractsViewer extends EditableInventory {
     public class ContractsInventory extends GeneratedInventory {
         //The type of contracts displayed in the GUI
         private ViewState viewState = ViewState.WAITING_APPROVAL;
-        private List<ViewState> otherViewStates = Arrays.stream(ViewState.values()).filter(viewState1 -> viewState1 != viewState).toList();
+        private List<ViewState> otherViewStates = Arrays.stream(ViewState.values()).filter(viewState1 -> viewState1 != viewState).collect(Collectors.toList());
         private List<Contract> displayedContracts = viewState.provide(playerData);
         private int page = 0;
         private final int contractsPerPage = getEditable().getByFunction("contract").getSlots().size();
@@ -279,7 +269,7 @@ public class ContractsViewer extends EditableInventory {
 
         @Override
         public String applyNamePlaceholders(String str) {
-            return str.replace("{view-state}", ContractsUtils.enumToChatName(viewState.toString()));
+            return ContractsUtils.applyColorCode(str.replace("{view-state}", ContractsUtils.enumToChatName(viewState.toString())));
         }
 
         @Override

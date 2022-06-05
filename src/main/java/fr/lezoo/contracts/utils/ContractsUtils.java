@@ -1,9 +1,17 @@
 package fr.lezoo.contracts.utils;
 
+import fr.lezoo.contracts.Contracts;
+import org.bukkit.ChatColor;
+
 import java.util.Arrays;
 import java.util.Locale;
 
 public class ContractsUtils {
+
+
+    public static String applyColorCode(String str) {
+        return ChatColor.translateAlternateColorCodes(Contracts.plugin.configManager.colorCodeChar,str);
+    }
 
     /**
      *Takes a time in millis and returns the hours that passed since that event

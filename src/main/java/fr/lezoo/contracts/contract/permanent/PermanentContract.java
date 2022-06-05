@@ -15,8 +15,8 @@ public abstract class PermanentContract extends Contract {
         super(section);
     }
 
-    public PermanentContract(UUID employer, UUID employee, PaymentInfo paiementInfo) {
-        super(employer, employee, paiementInfo);
+    public PermanentContract(UUID employer, PaymentInfo paymentInfo,String name) {
+        super(employer, paymentInfo,name);
     }
 
 }

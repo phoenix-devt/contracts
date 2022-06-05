@@ -2,11 +2,9 @@ package fr.lezoo.contracts.contract.classic;
 
 import fr.lezoo.contracts.contract.ContractState;
 import fr.lezoo.contracts.contract.PaymentInfo;
-import fr.lezoo.contracts.player.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -24,8 +22,8 @@ public class KillContract extends ClassicContract {
     }
 
 
-    public KillContract(UUID employer, UUID employee, UUID playerToKill, PaymentInfo paiementInfo) {
-        super(employer, employee, paiementInfo);
+    public KillContract(UUID employer, UUID playerToKill, PaymentInfo paymentInfo,String name) {
+        super(employer, paymentInfo,name);
         this.playerToKill = playerToKill;
     }
 
@@ -36,7 +34,7 @@ public class KillContract extends ClassicContract {
         if (killer instanceof Player) {
             Player killingPlayer = (Player) killer;
             if (killingPlayer.equals(Bukkit.getPlayer(employee)) && e.getEntity().equals(Bukkit.getPlayer(playerToKill))) {
-                changeContratState(ContractState.FULFILLED);
+                changeContractState(ContractState.FULFILLED);
             }
         }
     }

@@ -49,7 +49,7 @@ public class Placeholders {
     public String apply(String str) {
 
 
-        str=ChatColor.translateAlternateColorCodes('&',str);
+        str=ChatColor.translateAlternateColorCodes(Contracts.plugin.configManager.colorCodeChar,str);
         // Apply internal placeholders
         while (str.contains("{") && str.substring(str.indexOf("{")).contains("}")) {
             String holder = str.substring(str.indexOf("{") + 1, str.indexOf("}"));

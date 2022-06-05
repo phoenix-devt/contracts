@@ -10,7 +10,7 @@ import java.nio.file.Files;
 public class ConfigManager implements FileManager {
     public long reviewPeriod;
     public int maxCommentCharPerLine, maxCommentLines,defaultNotation;
-
+    public char colorCodeChar;
 
 
     @Override
@@ -19,6 +19,7 @@ public class ConfigManager implements FileManager {
         maxCommentLines = Contracts.plugin.getConfig().getInt("max-comment-lines");
         maxCommentCharPerLine = Contracts.plugin.getConfig().getInt("max-comment-char-per-line");
         defaultNotation=Contracts.plugin.getConfig().getInt("default-notation");
+        colorCodeChar=Contracts.plugin.getConfig().getString("color-code-char").charAt(0);
     }
 
     @Override

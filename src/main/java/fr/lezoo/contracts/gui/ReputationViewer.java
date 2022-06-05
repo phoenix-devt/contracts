@@ -7,6 +7,7 @@ import fr.lezoo.contracts.gui.objects.item.Placeholders;
 import fr.lezoo.contracts.gui.objects.item.SimpleItem;
 import fr.lezoo.contracts.player.PlayerData;
 import fr.lezoo.contracts.review.ContractReview;
+import fr.lezoo.contracts.utils.ContractsUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -125,7 +126,7 @@ public class ReputationViewer extends EditableInventory {
 
         @Override
         public String applyNamePlaceholders(String str) {
-            return str.replace("{player}",player.getDisplayName());
+            return ContractsUtils.applyColorCode(str.replace("{player}",player.getDisplayName()));
         }
 
         @Override

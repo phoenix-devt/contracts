@@ -7,9 +7,9 @@ import fr.lezoo.contracts.contract.ContractState;
 import fr.lezoo.contracts.review.ContractReview;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.entity.PlayerDeathEvent;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class PlayerData {
     UUID uuid;
@@ -74,7 +74,7 @@ public class PlayerData {
 
 
     public List<ContractReview> getReviews() {
-        return contractReviews.values().stream().sorted((review1, review2) -> (int) (review1.getReviewDate() - review2.getReviewDate())).toList();
+        return contractReviews.values().stream().sorted((review1, review2) -> (int) (review1.getReviewDate() - review2.getReviewDate())).collect(Collectors.toList());
     }
 
     /**
@@ -82,7 +82,7 @@ public class PlayerData {
      */
     public List<Contract> getContracts(ContractState... states) {
         return contracts.values().stream().filter(contract -> Arrays.asList(states).contains(contract.getState())).sorted((contract1, contract2) -> (int) (contract1.isEnded() ? contract1.getEndTime() - contract2.getEndTime()
-                : contract1.getStartTime() - contract2.getStartTime())).toList();
+                : contract1.getCreationTime() - contract2.getCreationTime())).collect(Collectors.toList());
     }
 
 
@@ -105,12 +105,11 @@ public class PlayerData {
 
     public void saveInConfig(FileConfiguration config) {
         //Set the reviews
-        List<String> reviews = contractReviews.keySet().stream().map(UUID::toString).toList();
+        List<String> reviews = contractReviews.keySet().stream().map(UUID::toString).collect(Collectors.toList());
         config.set("reviews", reviews);
 
-
         //Set the contracts
-        config.set("contracts", contracts.keySet().stream().toList());
+        config.set("contracts", contracts.keySet().stream().collect(Collectors.toList()));
 
     }
 
