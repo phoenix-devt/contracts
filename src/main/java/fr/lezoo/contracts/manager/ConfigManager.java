@@ -9,13 +9,16 @@ import java.nio.file.Files;
 
 public class ConfigManager implements FileManager {
     public long reviewPeriod;
-    public int maxCommentCharPerLine, maxCommentLines;
+    public int maxCommentCharPerLine, maxCommentLines,defaultNotation;
+
+
 
     @Override
     public void load() {
         reviewPeriod = Contracts.plugin.getConfig().getLong("review-period") * 3600 * 1000;
         maxCommentLines = Contracts.plugin.getConfig().getInt("max-comment-lines");
         maxCommentCharPerLine = Contracts.plugin.getConfig().getInt("max-comment-char-per-line");
+        defaultNotation=Contracts.plugin.getConfig().getInt("default-notation");
     }
 
     @Override

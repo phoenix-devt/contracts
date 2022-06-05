@@ -59,8 +59,6 @@ public class LendingContract extends PermanentContract {
                     //If the player can't refund than the contract is cancelled and a middle man will come
                     else
                         callDispute();
-
-
                 }
                 if(refundsMade>=numberRefunds) {
                     endContract(ContractEndReason.FULFILLED);

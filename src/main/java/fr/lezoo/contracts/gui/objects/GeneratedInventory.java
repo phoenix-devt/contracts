@@ -81,6 +81,7 @@ public abstract class GeneratedInventory extends PluginInventory {
         return inv;
     }
 
+
     public void open() {
 
         /*

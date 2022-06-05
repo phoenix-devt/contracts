@@ -18,12 +18,12 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 
-public class ReviewCommand extends BukkitCommand {
+public class ReputationViewer extends BukkitCommand {
 
     public static String NOTATION_ASK = "notationask";
     public static String COMMENT_ASK = "commentask";
 
-    protected ReviewCommand(String name, String description, String usageMessage, List<String> aliases) {
+    protected ReputationViewer(String name, String description, String usageMessage, List<String> aliases) {
         super(name, description, usageMessage, aliases);
     }
 

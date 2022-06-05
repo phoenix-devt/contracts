@@ -59,12 +59,19 @@ public abstract class Contract {
         return endTime;
     }
 
-    public OfflinePlayer getEmployer() {
-        return Bukkit.getOfflinePlayer(employer);
+    public String getEmployeeName() {
+        return Bukkit.getOfflinePlayer(employee)!=null? Bukkit.getOfflinePlayer(employee).getName():"NO_PLAYER";
+    }
+    public String getEmployerName() {
+        return Bukkit.getOfflinePlayer(employer)!=null? Bukkit.getOfflinePlayer(employer).getName():"NO_PLAYER";
     }
 
-    public OfflinePlayer getEmployee() {
-        return Bukkit.getOfflinePlayer(employee);
+    public UUID getEmployer() {
+        return employer;
+    }
+
+    public UUID getEmployee() {
+        return employee;
     }
 
     public PaymentInfo getPaymentInfo() {
@@ -98,11 +105,6 @@ public abstract class Contract {
         //We change the state of the contract and add it to contractsToReview
         state = newState;
 
-        //If the employer or employee is their we change the values of their open... maps
-        if(PlayerData.has(employee))
-            PlayerData.get(employee).changeState(contractId);
-        if(PlayerData.has(employer))
-            PlayerData.get(employer).changeState(contractId);
 
 
     }

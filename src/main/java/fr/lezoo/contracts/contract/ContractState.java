@@ -1,6 +1,6 @@
 package fr.lezoo.contracts.contract;
 
 public enum ContractState {
-    OPEN, FULFILLED,DISPUTE,RESOLVED;
+    WAITING_APPROVAL,OPEN,FULFILLED,DISPUTED,RESOLVED;
 
 }

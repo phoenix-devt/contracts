@@ -32,6 +32,17 @@ public class PlayerDataManager implements FileManager {
         Bukkit.getOnlinePlayers().forEach(player -> players.put(player.getUniqueId(), new PlayerData(player)));
     }
 
+
+    /**
+     * Used to load a player that is offline if needed
+     * @param uuid
+     */
+    public void setup(UUID uuid) {
+        if(!players.containsKey(uuid))
+            players.put(uuid, new PlayerData(uuid));
+
+    }
+
     /**
      * Called when a player logs on the server
      */

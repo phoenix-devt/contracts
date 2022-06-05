@@ -6,3 +6,6 @@ review-period: 5
 #The number of characters and lines the player can give in a comment.
 max-comment-lines: 4
 max-comment-char-per-line: 20
+
+#The default notation on a review if you don't change it. (from 1 to 5)
+default-notation: 3

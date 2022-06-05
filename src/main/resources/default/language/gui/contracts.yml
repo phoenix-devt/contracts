@@ -1,0 +1,20 @@
+name: '&e{view-state} contracts'
+slots: 45
+items:
+  next-page:
+    function: 'next-page'
+    name: '&cNext Page'
+    item: ARROW
+    slots: [35]
+  previous-page:
+    function: 'previous-page'
+    name: '&cPrevious Page'
+    item: ARROW
+    slots: [44]
+  change-view:
+    function: 'change-view'
+    name: '&6'
+    #The materials depending on the slot of the change-view item
+    material1: BLUE_WOOL
+    material2: WHITE_WOOL
+    material3: RED_WOOL

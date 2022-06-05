@@ -6,3 +6,6 @@
 -Contract Viewer
 -Review Viewer
 -Contract market place viewer
+-Mettre en avant avec de la pertinence (modele mathématique)
+-Livre quand contrat créé.
+-command setDebt

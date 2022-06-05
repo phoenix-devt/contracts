@@ -33,7 +33,8 @@ public class ReviewManager implements FileManager {
             for (String key : config.getConfig().getKeys(true))
                 config.getConfig().set(key, null);
         }
-
+        for(ContractReview review:reviews.values())
+            review.saveInConfig(config.getConfig());
 
         config.save();
 

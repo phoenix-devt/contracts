@@ -1,8 +1,7 @@
 package fr.lezoo.contracts.utils;
 
 import fr.lezoo.contracts.Contracts;
-import fr.lezoo.contracts.contract.Contract;
-import fr.lezoo.contracts.gui.ContractViewer;
+import fr.lezoo.contracts.gui.ContractsViewer;
 import fr.lezoo.contracts.player.PlayerData;
 import fr.lezoo.contracts.review.ContractReview;
 import fr.lezoo.contracts.utils.message.Message;
@@ -17,13 +16,13 @@ public class InputHandler {
         catch (Exception e) {
             Message.NOT_VALID_NOTATION.format("input",str).send(playerData.getPlayer());
         }
-        ContractViewer.displayChoices(playerData,review);
+        ContractsViewer.displayChoices(playerData,review);
         return true;
     };
 
     public static final TriFunction<PlayerData, String, ContractReview, Boolean> SET_COMMENT = (playerData, str, review) -> {
         if(str.equals("")) {
-            ContractViewer.displayChoices(playerData,review);
+            ContractsViewer.displayChoices(playerData,review);
             return true;
         }
         int lines=(str.length()/Contracts.plugin.configManager.maxCommentCharPerLine)+1;
