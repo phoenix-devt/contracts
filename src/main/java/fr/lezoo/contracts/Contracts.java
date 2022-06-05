@@ -1,5 +1,6 @@
 package fr.lezoo.contracts;
 
+import fr.lezoo.contracts.compat.Metrics;
 import fr.lezoo.contracts.compat.placeholder.DefaultPlaceholderParser;
 import fr.lezoo.contracts.compat.placeholder.PlaceholderParser;
 import fr.lezoo.contracts.manager.ConfigManager;
@@ -29,8 +30,9 @@ public class Contracts extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        Bukkit.broadcastMessage("ENABLED");
 
+        // Metrics data
+        new Metrics(this, 15383);
 
         //Register eco
         RegisteredServiceProvider<Economy> provider = getServer().getServicesManager().getRegistration(Economy.class);
