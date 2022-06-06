@@ -2,6 +2,7 @@ package fr.lezoo.contracts.gui.objects;
 
 import fr.lezoo.contracts.Contracts;
 import fr.lezoo.contracts.gui.objects.item.InventoryItem;
+import fr.lezoo.contracts.player.PlayerData;
 import org.apache.commons.lang.Validate;
 import org.bukkit.configuration.ConfigurationSection;
 
@@ -86,4 +87,6 @@ public abstract class EditableInventory {
 
         return loadItem(function, config);
     }
+
+    
 }

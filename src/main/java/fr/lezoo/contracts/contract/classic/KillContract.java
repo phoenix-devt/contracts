@@ -1,7 +1,12 @@
 package fr.lezoo.contracts.contract.classic;
 
+import fr.lezoo.contracts.Contracts;
 import fr.lezoo.contracts.contract.ContractState;
+import fr.lezoo.contracts.contract.ContractType;
 import fr.lezoo.contracts.contract.PaymentInfo;
+import fr.lezoo.contracts.contract.PaymentType;
+import fr.lezoo.contracts.utils.ContractsUtils;
+import fr.lezoo.contracts.utils.message.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -13,7 +18,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import java.util.UUID;
 
 public class KillContract extends ClassicContract {
-    private final UUID playerToKill;
+    private UUID playerToKill;
 
 
     public KillContract(ConfigurationSection section) {
@@ -22,10 +27,20 @@ public class KillContract extends ClassicContract {
     }
 
 
-    public KillContract(UUID employer, UUID playerToKill, PaymentInfo paymentInfo,String name) {
-        super(employer, paymentInfo,name);
-        this.playerToKill = playerToKill;
+    public KillContract(UUID employer) {
+        super(employer);
+        //We register the new parameter to set
+        addParameter("player-to-kill", (p, str) -> {
+                    if (Contracts.plugin.playerManager.has(str)) {
+                        playerToKill = Contracts.plugin.playerManager.get(str);
+                        filledParameters.put("player-to-kill",str);
+                    }
+                    else
+                        Message.NOT_VALID_PLAYER.format("input",str).send(p);
+                }
+        );
     }
+
 
 
     @EventHandler
@@ -39,11 +54,12 @@ public class KillContract extends ClassicContract {
         }
     }
 
-
     @Override
     public void save(FileConfiguration config) {
         super.save(config);
-        String str = playerToKill.toString();
-        config.set(str + ".player-to-kill", playerToKill);
+        String str = contractId.toString();
+        //Very important to set the type in the yml
+        config.set(str+".type", ContractType.KILL.toString());
+        config.set(str + ".player-to-kill", playerToKill.toString());
     }
 }

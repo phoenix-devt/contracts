@@ -6,8 +6,13 @@ import org.bukkit.configuration.ConfigurationSection;
 import java.util.Objects;
 
 public class PaymentInfo {
-    private final PaymentType type;
-    private final double amount;
+    private PaymentType type;
+    private double amount;
+
+
+    public PaymentInfo() {
+
+    }
 
     public PaymentInfo(PaymentType type, double amount) {
         this.type = type;
@@ -27,4 +32,11 @@ public class PaymentInfo {
         return amount;
     }
 
+    public void setType(PaymentType type) {
+        this.type = type;
+    }
+
+    public void setAmount(double amount) {
+        this.amount = amount;
+    }
 }

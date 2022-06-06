@@ -4,17 +4,21 @@ import fr.lezoo.contracts.Contracts;
 import fr.lezoo.contracts.api.ConfigFile;
 import fr.lezoo.contracts.contract.Contract;
 import fr.lezoo.contracts.contract.ContractState;
+import fr.lezoo.contracts.contract.ContractType;
 import fr.lezoo.contracts.review.ContractReview;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.util.*;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public class PlayerData {
-    UUID uuid;
-    Player player;
-    boolean onChatInput;
+    private final UUID uuid;
+    private final String playerName;
+    private Player player;
+    private boolean onChatInput;
     //We want to keep the order in which contracts where inserted
     private final Map<UUID, Contract> contracts = new HashMap<>();
 
@@ -25,14 +29,20 @@ public class PlayerData {
 
 
     public PlayerData(UUID uuid) {
-        this.uuid=uuid;
+        this.uuid = uuid;
+        playerName = Bukkit.getOfflinePlayer(uuid).getName();
         loadFromConfig();
     }
 
     public PlayerData(Player player) {
+        playerName = player.getName();
         this.player = player;
         this.uuid = player.getUniqueId();
         loadFromConfig();
+    }
+
+    public String getPlayerName() {
+        return playerName;
     }
 
     public boolean isOnChatInput() {
@@ -47,16 +57,21 @@ public class PlayerData {
         return (contract.isEnded() && (System.currentTimeMillis() - contract.getEndTime()) < Contracts.plugin.configManager.reviewPeriod);
     }
 
+    public void addContract(Contract contract) {
+        contracts.put(contract.getUuid(), contract);
+    }
+
     public void addReview(ContractReview review) {
-        int totalNotation=(int)meanNotation*numberReviews;
-        contractReviews.put(review.getUuid(),review);
+        int totalNotation = (int) meanNotation * numberReviews;
+        contractReviews.put(review.getUuid(), review);
         numberReviews++;
-        meanNotation=((double)(totalNotation+review.getNotation()))/((double)numberReviews);
+        meanNotation = ((double) (totalNotation + review.getNotation())) / ((double) numberReviews);
     }
 
 
     public void loadFromConfig() {
-        FileConfiguration config = new ConfigFile("userdata", uuid.toString()).getConfig();
+        FileConfiguration config = new ConfigFile("/userdata", uuid.toString()).getConfig();
+
 
         //We load the contracts
         for (String key : config.getStringList("contracts")) {
@@ -86,9 +101,13 @@ public class PlayerData {
     }
 
 
-
     public static boolean has(UUID uuid) {
         return Contracts.plugin.playerManager.has(uuid);
+    }
+
+    public static PlayerData get(String name) {
+        UUID uuid = Contracts.plugin.playerManager.get(name);
+        return uuid == null ? null : PlayerData.get(uuid);
     }
 
     public static PlayerData get(Player player) {
@@ -109,7 +128,9 @@ public class PlayerData {
         config.set("reviews", reviews);
 
         //Set the contracts
-        config.set("contracts", contracts.keySet().stream().collect(Collectors.toList()));
+        List<String> list = contracts.keySet().stream().map(UUID::toString).collect(Collectors.toList());
+        config.set("contracts", list);
+
 
     }
 

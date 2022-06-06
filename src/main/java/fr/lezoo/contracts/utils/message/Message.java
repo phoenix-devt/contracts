@@ -9,12 +9,42 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum Message {
+    CONTRACT_REFUSED("&cYou refused the contract &6{contract-name}&e."),
+
+    CONTRACT_ACCEPTED("&aCongratulations you accepted the contract &6{contract-name}&a."),
+
+    ARE_YOU_SURE_TO_ACCEPT("&eType 'yes' to accept the contract &6{contract-name}&7."),
+
+    CREATED_CONTRACT("&aCongratulations you created the contract &6{contract-name}&a."),
+
+    SET_PARAMETER_ASK("&eEnter the value of &6{parameter-name}&e."),
+
+    ALREADY_ON_CHAT_INPUT("&cYou are already on a chat input!"),
+
+    NOT_VALID_INTEGER("&c{input} is not a valid integer."),
+
+    NOT_VALID_DOUBLE("&c{input} is not a valid number."),
+
+    //TODO Change when material is on
+    NOT_VALID_PAYMENT_TYPE("&c{input} is not a payment type, payment type can be MONEY."),
+
+    NOT_VALID_PLAYER("&c{input} is not a valid player."),
+
+    MISSING_CONTRACT_PARAMETER("&cYou can't create the contract yet, some parameters are missing."),
+
+
     SET_NOTATION_INFO("&e(Click to Change) Notation: {notation}"),
+
     SET_COMMENT_INFO("&e(Click to Change) Comment: {comment}"),
+
     SET_NOTATION_ASK("&eWrite an integer between 1 and 5 for the notation."),
+
     SET_COMMENT_ASK("&eWrite the comment you want to leave, send a blank message to stop the redaction."),
+
     COMMENT_TOO_LONG("&cThe comment you tried to post is too long, you must shorten it."),
+
     NOT_VALID_NOTATION("&c{input} is not a valid notation, it must be an integer."),
+
     NOT_ENOUGH_PERMISSIONS("&cYou don't have enough permissions."),
     ;
 

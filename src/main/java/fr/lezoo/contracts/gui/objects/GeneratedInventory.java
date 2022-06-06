@@ -75,7 +75,7 @@ public abstract class GeneratedInventory extends PluginInventory {
         Inventory inv = Bukkit.createInventory(this, editable.getSlots(), Contracts.plugin.placeholderParser.parse(player, getName()));
 
         for (InventoryItem item : editable.getItems())
-            if (item.isDisplayed(this))
+            if (item!=null&&item.isDisplayed(this))
                 item.display(inv, this);
 
         return inv;

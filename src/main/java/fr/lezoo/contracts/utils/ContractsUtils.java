@@ -28,9 +28,11 @@ public class ContractsUtils {
         return str.toUpperCase().replace("-", "_");
     }
 
-    public static String enumToChatName(String str) {
+
+
+    public static String chatName(String str) {
         StringBuilder result = new StringBuilder();
-        Arrays.stream(str.split("_")).forEach(word -> result.append(word.substring(0, 1).toUpperCase()).append(word.substring(1).toLowerCase()));
+        Arrays.stream(str.split("_")).forEach(intermediary -> Arrays.stream(intermediary.split("-")).forEach(word->result.append(word.substring(0, 1).toUpperCase()).append(word.substring(1).toLowerCase())));
         return result.toString();
     }
 }

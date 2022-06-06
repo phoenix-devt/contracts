@@ -15,30 +15,30 @@ items:
     function: 'change-view'
     name: '&eClick to see &6{view-state}&e contracts.'
     #The materials depending on the slot of the change-view item
-    material1: BLUE_WOOL
-    material2: WHITE_WOOL
-    material3: RED_WOOL
+    material1: BLUE_CONCRETE
+    material2: WHITE_CONCRETE
+    material3: RED_CONCRETE
     slots: [8,17,26]
   contract:
     function: 'contract'
     item: BOOK
     slots: [1,2,3,4,5,6,10,11,12,13,14,15,19,20,21,22,23,24,28,29,30,31,32,33,37,38,39,40,41,42]
-    waiting-approval:
-      name: '&eContract: {contract-name}'
+    waiting-acceptance:
+      name: '&eContract: {name}'
       lore:
-        - '&eAwaiting for an approval.'
+        - '&eAwaiting for an acceptance.'
         - '&ePosted {start-since} ago.'
     open:
-      name: '&eContract: {contract-name}'
+      name: '&eContract: {name}'
       lore:
         - '&eContract creator: {employer}'
-        - '&eAccepted by &6{employee} &e{approval-since} ago'
+        - '&eAccepted by &6{employee} &e{acceptance-since} ago'
     disputed:
-      name: '&eContract: {contract-name}'
+      name: '&eContract: {name}'
       lore:
         - '&cThere is a dispute between &6{employer} &cand &6{employee}'
     ended:
-      name: '&eContract: {contract-name}'
+      name: '&eContract: {name}'
       lore:
         - 'This contract ended {end-since} ago.'
         - 'Can review: {can-review}'

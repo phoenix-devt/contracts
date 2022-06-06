@@ -1,6 +1,8 @@
 package fr.lezoo.contracts.gui.objects.item;
 
+import fr.lezoo.contracts.Contracts;
 import fr.lezoo.contracts.gui.objects.GeneratedInventory;
+import fr.lezoo.contracts.utils.ContractsUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -28,7 +30,7 @@ public abstract class InventoryItem<T extends GeneratedInventory> {
     public InventoryItem(InventoryItem parent, ConfigurationSection config,Material material) {
         this.id = config.getName();
         this.function = config.getString("function", "").toLowerCase();
-        this.material = material!=null?material:config.getString("item") != null ? Material.valueOf(config.getString("item").toUpperCase().replace(" ", "_").replace("-", "_")) : Material.AIR;
+        this.material = material!=null?material:config.getString("item") != null ? Material.valueOf(ContractsUtils.enumName(config.getString("item"))) : Material.AIR;
         this.name = config.getString("name");
         this.lore = config.getStringList("lore");
         this.hideFlags = config.getBoolean("hide-flags");

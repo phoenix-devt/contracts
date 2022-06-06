@@ -11,7 +11,7 @@ import java.util.UUID;
 
 public class ReviewManager implements FileManager {
     private final HashMap<UUID, ContractReview> reviews = new HashMap<>();
-    private final ConfigFile config = new ConfigFile("review");
+    private ConfigFile config;
 
 
 
@@ -22,6 +22,7 @@ public class ReviewManager implements FileManager {
 
     @Override
     public void load() {
+        config= new ConfigFile("review");
         for (String key : config.getConfig().getKeys(false)) {
             reviews.put(UUID.fromString(key), new ContractReview(config.getConfig().getConfigurationSection(key)));
         }
@@ -29,6 +30,7 @@ public class ReviewManager implements FileManager {
 
     @Override
     public void save(boolean clearBefore) {
+        config= new ConfigFile("review");
         if (clearBefore) {
             for (String key : config.getConfig().getKeys(true))
                 config.getConfig().set(key, null);

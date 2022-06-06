@@ -1,5 +1,6 @@
 package fr.lezoo.contracts.gui;
 
+import fr.lezoo.contracts.Contracts;
 import fr.lezoo.contracts.gui.objects.EditableInventory;
 import fr.lezoo.contracts.gui.objects.GeneratedInventory;
 import fr.lezoo.contracts.gui.objects.item.InventoryItem;
@@ -16,6 +17,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
+import java.util.logging.Level;
 
 public class ReputationViewer extends EditableInventory {
 
@@ -32,11 +34,36 @@ public class ReputationViewer extends EditableInventory {
             return new PreviousPageItem(config);
         if (function.equals("review"))
             return new ReviewItem(config);
+        if(function.equals("go-back"))
+            return new GoBackItem(config);
         return null;
     }
 
+    /**
+     * Used when a player tries to check his reputation
+     */
     public ReputationInventory newInventory(PlayerData playerData) {
-        return new ReputationInventory(playerData,this);
+        return new ReputationInventory(playerData,playerData,this,null);
+    }
+    public ReputationInventory newInventory(PlayerData playerData,PlayerData reputationPlayer) {
+        return new ReputationInventory(playerData,reputationPlayer,this,null);
+    }
+    public ReputationInventory newInventory(PlayerData playerData,PlayerData reputationPlayer,GeneratedInventory invToOpen) {
+        return new ReputationInventory(playerData,reputationPlayer,this,invToOpen);
+    }
+
+
+
+    public class GoBackItem extends SimpleItem<ReputationInventory> {
+
+        public GoBackItem(ConfigurationSection config) {
+            super(config);
+        }
+
+        @Override
+        public boolean isDisplayed(ReputationInventory inv) {
+            return inv.invToOpen!=null;
+        }
     }
 
 
@@ -54,8 +81,9 @@ public class ReputationViewer extends EditableInventory {
 
         @Override
         public ItemStack getDisplayedItem(ReputationInventory inv, int n) {
-            if (inv.getReviews().size() >= inv.getPage() * inv.getReviewPerPage() + n)
+            if (inv.getReviews().size() <= inv.getPage() * inv.getReviewPerPage() + n)
                 return new ItemStack(Material.AIR);
+
             return super.getDisplayedItem(inv, n);
         }
 
@@ -76,6 +104,7 @@ public class ReputationViewer extends EditableInventory {
 
         public PreviousPageItem(ConfigurationSection config) {
             super(config);
+            Bukkit.broadcastMessage(getMaterial().toString());
         }
 
         public boolean isDisplayed(ReputationInventory inv) {
@@ -96,15 +125,20 @@ public class ReputationViewer extends EditableInventory {
     }
 
     public class ReputationInventory extends GeneratedInventory {
-        List<ContractReview> reviews = playerData.getReviews();
+        private final GeneratedInventory invToOpen;
+        private final PlayerData reputationPlayer;
+        private final List<ContractReview> reviews;
         private int page = 0;
         //The getByFunction method of generated inventory will return only if the item has been loaded
         // in it which is not the case here -> editable method
         private final int reviewPerPage =getEditable().getByFunction("review").getSlots().size();
         private final int maxPage = (Math.max(0, playerData.getReviews().size() - 1)) / reviewPerPage;
 
-        public ReputationInventory(PlayerData playerData, EditableInventory editable) {
+        public ReputationInventory(PlayerData playerData,PlayerData reputationPlayer, EditableInventory editable,GeneratedInventory invToOpen) {
             super(playerData, editable);
+            this.reputationPlayer=reputationPlayer;
+            reviews= reputationPlayer.getReviews();
+            this.invToOpen=invToOpen;
         }
 
 
@@ -131,6 +165,7 @@ public class ReputationViewer extends EditableInventory {
 
         @Override
         public void whenClicked(InventoryClickEvent event, InventoryItem item) {
+            event.setCancelled(true);
             if (item.getFunction().equals("next-page")) {
                 page++;
                 open();
@@ -138,6 +173,9 @@ public class ReputationViewer extends EditableInventory {
             if (item.getFunction().equals("previous-page")) {
                 page--;
                 open();
+            }
+            if(item instanceof GoBackItem) {
+                invToOpen.open();
             }
         }
 

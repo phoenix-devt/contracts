@@ -17,8 +17,8 @@ public abstract class ClassicContract extends Contract implements Listener {
         super(section);
     }
 
-    public ClassicContract(UUID employer, PaymentInfo paymentInfo,String name) {
-        super(employer, paymentInfo,name);
+    public ClassicContract(UUID employer) {
+        super(employer);
     }
 
 

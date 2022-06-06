@@ -2,12 +2,13 @@ package fr.lezoo.contracts.contract.permanent;
 
 import fr.lezoo.contracts.Contracts;
 import fr.lezoo.contracts.contract.ContractState;
-import fr.lezoo.contracts.contract.PaymentInfo;
 import fr.lezoo.contracts.contract.PaymentType;
+import fr.lezoo.contracts.utils.message.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.security.MessageDigest;
 import java.util.UUID;
 
 /**
@@ -17,15 +18,15 @@ import java.util.UUID;
 public class LendingContract extends PermanentContract {
     //period between each refund in hours
     //numberRefunds is the number of time there need to be a refund and refunds made correspond to the refunds already made
-    private final int period, interestRate, numberRefunds;
+    private int interestPeriod, interestRate, numberRefunds;
     private int refundsMade;
-    private final double moneyPerRefund;
+    private double moneyPerRefund;
     private BukkitRunnable runnable;
 
 
     public LendingContract(ConfigurationSection section) {
         super(section);
-        period = section.getInt("period");
+        interestPeriod = section.getInt("period");
         interestRate = section.getInt("interest-rate");
         numberRefunds = section.getInt("number-refunds");
         refundsMade = section.getInt("refunds-made");
@@ -34,12 +35,37 @@ public class LendingContract extends PermanentContract {
         startRunnable();
     }
 
-    public LendingContract(UUID employer, PaymentInfo paymentInfo,String name, int period, int numberRefunds, int interestRate) {
-        super(employer, paymentInfo,name);
-        this.period = period;
-        this.interestRate = interestRate;
-        this.numberRefunds = numberRefunds;
+    @Override
+    public void createContract() {
         moneyPerRefund = (paymentInfo.getAmount() * (1 + ((double) interestRate) / 100)) / numberRefunds;
+    }
+
+
+    public LendingContract(UUID employer) {
+        super(employer);
+
+        addParameter("interest-period", (p, str) -> {
+            try {
+                interestPeriod = Integer.parseInt(str);
+            } catch (Exception e) {
+                Message.NOT_VALID_INTEGER.format("input", str).send(p);
+            }
+        });
+        addParameter("interest-rate", (p, str) -> {
+            try {
+                interestRate = Integer.parseInt(str);
+            } catch (Exception e) {
+                Message.NOT_VALID_INTEGER.format("input", str).send(p);
+            }
+        });
+        addParameter("number-refunds", (p, str) -> {
+            try {
+                numberRefunds = Integer.parseInt(str);
+            } catch (Exception e) {
+                Message.NOT_VALID_INTEGER.format("input", str).send(p);
+            }
+        });
+
         //At the beginning
         refundsMade = 0;
         startRunnable();
@@ -54,7 +80,7 @@ public class LendingContract extends PermanentContract {
 
                 //employer lender so it the employer who gives money to the employee
                 if (paymentInfo.getType() == PaymentType.MONEY) {
-                    if (Contracts.plugin.economy.getBalance(Bukkit.getOfflinePlayer(employer)) > moneyPerRefund)  {
+                    if (Contracts.plugin.economy.getBalance(Bukkit.getOfflinePlayer(employer)) > moneyPerRefund) {
                         Contracts.plugin.economy.withdrawPlayer(Bukkit.getOfflinePlayer(employer), moneyPerRefund);
                         Contracts.plugin.economy.depositPlayer(Bukkit.getOfflinePlayer(employee), moneyPerRefund);
                         refundsMade++;
@@ -63,13 +89,13 @@ public class LendingContract extends PermanentContract {
                     else
                         callDispute();
                 }
-                if(refundsMade>=numberRefunds) {
+                if (refundsMade >= numberRefunds) {
                     changeContractState(ContractState.FULFILLED);
                 }
             }
         };
         //1 hour =60*60*20 ticks
-        runnable.runTaskTimer(Contracts.plugin, 0, period * 60 * 60 * 20);
+        runnable.runTaskTimer(Contracts.plugin, 0, interestPeriod * 60 * 60 * 20);
     }
 
 }
