@@ -21,15 +21,14 @@ public class ConfigManager implements FileManager {
         colorCodeChar = Contracts.plugin.getConfig().getString("color-code-char").charAt(0);
 
 
-        //We load default files
-        loadDefaultFile("command.yml");
+        // Load default files
+        loadDefaultFile("commands.yml");
     }
 
     @Override
     public void save(boolean clearBefore) {
 
     }
-
 
     public void loadDefaultFile(String name) {
         loadDefaultFile("", name);

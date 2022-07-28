@@ -2,7 +2,9 @@ name: Contracts
 main: fr.phoenix.contracts.Contracts
 version: 1.0.0
 api-version: 1.13
+depend: [ Vault ]
+softdepend: [ PlaceholderAPI ]
 commands:
   contract:
     description: Main command.
-    aliases: [co]
+    aliases: [ co ]

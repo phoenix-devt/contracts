@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+@Deprecated
 public class DebtManager {
 
     private final HashMap<UUID, List<DebtInfo>> debts = new HashMap<>();

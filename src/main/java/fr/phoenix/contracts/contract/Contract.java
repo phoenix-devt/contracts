@@ -248,8 +248,10 @@ public abstract class Contract {
         if (employer != null)
             Message.CONTRACT_FULFILLED.format("contract-name", name, "other", employee.getName()).send(employer);
         Message.CONTRACT_FULFILLED.format("contract-name", name, "other", employer.getName()).send(employee);
-        // The employer is now in debt of the player
-        Contracts.plugin.debtManager.addDebt(this.employer, this.employee, amount);
+
+        // Transactions
+        Contracts.plugin.economy.withdrawPlayer(Bukkit.getOfflinePlayer(this.employer), amount);
+        Contracts.plugin.economy.depositPlayer(Bukkit.getOfflinePlayer(this.employee), amount);
     }
 
 

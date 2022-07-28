@@ -1,6 +1,7 @@
 package fr.phoenix.contracts.player;
 
 import fr.phoenix.contracts.Contracts;
+import fr.phoenix.contracts.contract.debt.DebtInfo;
 import fr.phoenix.contracts.utils.ConfigFile;
 import fr.phoenix.contracts.contract.Contract;
 import fr.phoenix.contracts.contract.ContractState;
@@ -104,7 +105,6 @@ public class PlayerData {
             contractReviews.put(review.getUuid(), review);
         }
     }
-
 
     public List<ContractReview> getReviews() {
         return contractReviews.values().stream().sorted((review1, review2) -> (int) (review1.getReviewDate() - review2.getReviewDate())).collect(Collectors.toList());

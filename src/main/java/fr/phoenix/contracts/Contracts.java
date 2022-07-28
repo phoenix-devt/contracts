@@ -29,16 +29,15 @@ public class Contracts extends JavaPlugin {
     public final ReviewManager reviewManager = new ReviewManager();
     public final PlaceholderParser placeholderParser = new DefaultPlaceholderParser();
 
-    public final DebtManager debtManager = new DebtManager();
-
     @Override
     public void onEnable() {
         // Metrics data
         new Metrics(this, 15383);
 
-        //Save default config if it doesn't exist
+        // Save default config if it doesn't exist
         saveDefaultConfig();
-        //Register eco
+
+        // Register eco
         RegisteredServiceProvider<Economy> provider = getServer().getServicesManager().getRegistration(Economy.class);
         if (provider != null)
             economy = provider.getProvider();
@@ -48,35 +47,31 @@ public class Contracts extends JavaPlugin {
             return;
         }
 
-        //Register listeners
+        // Register listeners
         getServer().getPluginManager().registerEvents(new PlayerListener(), this);
 
-
-        //We register the root command
+        // Register the root command
         getCommand("contract").setExecutor(new ContractTreeRoot("contract", ""));
 
-        //Save the commands
-        try {
-            final Field bukkitCommandMap = Bukkit.getServer().getClass().getDeclaredField("commandMap");
-
-            bukkitCommandMap.setAccessible(true);
-            CommandMap commandMap = (CommandMap) bukkitCommandMap.get(Bukkit.getServer());
-            // We then register the command indivually
-            FileConfiguration config = new ConfigFile("command").getConfig();
-
-            commandMap.register("reputation-viewer", new ReputationViewerCommand(config.getConfigurationSection("reputation-viewer")));
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-
-        //Load manager (the order is important: player must be loaded at the end)
+        // Load managers (the order is important: player must be loaded at the end)
         configManager.load();
         contractManager.load();
         reviewManager.load();
         InventoryManager.load();
         playerManager.load();
+
+        // Register commands
+        try {
+            final Field bukkitCommandMap = Bukkit.getServer().getClass().getDeclaredField("commandMap");
+            bukkitCommandMap.setAccessible(true);
+            CommandMap commandMap = (CommandMap) bukkitCommandMap.get(Bukkit.getServer());
+            FileConfiguration config = new ConfigFile("commands").getConfig();
+
+            commandMap.register("reputation-viewer", new ReputationViewerCommand(config.getConfigurationSection("reputation-viewer")));
+
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
     }
 
     @Override

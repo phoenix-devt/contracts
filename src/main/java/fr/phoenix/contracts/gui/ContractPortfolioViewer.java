@@ -264,21 +264,19 @@ public class ContractPortfolioViewer extends EditableInventory {
         //The type of contracts displayed in the GUI
         private ViewState viewState = ViewState.WAITING_ACCEPTANCE;
         private List<ViewState> otherViewStates = Arrays.stream(ViewState.values()).filter(viewState1 -> viewState1 != viewState).collect(Collectors.toList());
-        private List<Contract> displayedContracts = viewState.provide(playerData);
+        private List<Contract> displayedContracts = playerData.getContracts(viewState.corresponding);
         private int page = 0;
         private final int contractsPerPage = getEditable().getByFunction("contract").getSlots().size();
         private int maxPage = Math.max(0, displayedContracts.size() - 1) / contractsPerPage;
 
         public ContractPortfolioInventory(PlayerData playerData, EditableInventory editable) {
             super(playerData, editable);
-            Bukkit.broadcastMessage("NAME:"+getName());
         }
-
 
         public void changeState(ViewState viewState) {
             this.viewState = viewState;
             otherViewStates = Arrays.stream(ViewState.values()).filter(viewState1 -> viewState1 != viewState).collect(Collectors.toList());
-            displayedContracts = viewState.provide(playerData);
+            displayedContracts = playerData.getContracts(viewState.corresponding);
             maxPage = Math.max(0, displayedContracts.size() - 1) / contractsPerPage;
         }
 
