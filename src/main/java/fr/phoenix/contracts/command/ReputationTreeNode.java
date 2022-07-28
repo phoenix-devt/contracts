@@ -10,7 +10,6 @@ import org.bukkit.entity.Player;
 
 public class ReputationTreeNode extends CommandTreeNode {
 
-
     /**
      * Creates a command tree node which a specific parent and id
      *

@@ -6,7 +6,7 @@ import fr.phoenix.contracts.gui.objects.item.InventoryItem;
 import fr.phoenix.contracts.gui.objects.item.Placeholders;
 import fr.phoenix.contracts.gui.objects.item.SimpleItem;
 import fr.phoenix.contracts.player.PlayerData;
-import fr.phoenix.contracts.review.ContractReview;
+import fr.phoenix.contracts.contract.review.ContractReview;
 import fr.phoenix.contracts.utils.ContractsUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;

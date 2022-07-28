@@ -3,7 +3,7 @@ package fr.phoenix.contracts.utils;
 import fr.phoenix.contracts.gui.objects.GeneratedInventory;
 import fr.phoenix.contracts.listener.temp.TemporaryListener;
 import fr.phoenix.contracts.player.PlayerData;
-import fr.phoenix.contracts.review.ContractReview;
+import fr.phoenix.contracts.contract.review.ContractReview;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerMoveEvent;

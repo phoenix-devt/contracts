@@ -1,20 +1,19 @@
-package fr.lezoo.contracts.gui;
+package fr.phoenix.contracts.gui;
 
-import fr.lezoo.contracts.Contracts;
-import fr.lezoo.contracts.contract.Contract;
-import fr.lezoo.contracts.contract.ContractState;
-import fr.lezoo.contracts.contract.ContractType;
-import fr.lezoo.contracts.gui.objects.EditableInventory;
-import fr.lezoo.contracts.gui.objects.GeneratedInventory;
-import fr.lezoo.contracts.gui.objects.item.InventoryItem;
-import fr.lezoo.contracts.gui.objects.item.Placeholders;
-import fr.lezoo.contracts.gui.objects.item.SimpleItem;
-import fr.lezoo.contracts.manager.InventoryManager;
-import fr.lezoo.contracts.player.PlayerData;
-import fr.lezoo.contracts.utils.ChatInput;
-import fr.lezoo.contracts.utils.ContractsUtils;
-import fr.lezoo.contracts.utils.message.Message;
-import org.apache.commons.lang.Validate;
+import fr.phoenix.contracts.Contracts;
+import fr.phoenix.contracts.contract.Contract;
+import fr.phoenix.contracts.contract.ContractState;
+import fr.phoenix.contracts.contract.ContractType;
+import fr.phoenix.contracts.gui.objects.EditableInventory;
+import fr.phoenix.contracts.gui.objects.GeneratedInventory;
+import fr.phoenix.contracts.gui.objects.item.InventoryItem;
+import fr.phoenix.contracts.gui.objects.item.Placeholders;
+import fr.phoenix.contracts.gui.objects.item.SimpleItem;
+import fr.phoenix.contracts.manager.InventoryManager;
+import fr.phoenix.contracts.player.PlayerData;
+import fr.phoenix.contracts.utils.ChatInput;
+import fr.phoenix.contracts.utils.ContractsUtils;
+import fr.phoenix.contracts.utils.message.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -22,17 +21,14 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 
@@ -43,8 +39,6 @@ public class ContractMarketViewer extends EditableInventory {
 
     @Override
     public InventoryItem loadItem(String function, ConfigurationSection config) {
-        if (function == null)
-            Contracts.log(Level.SEVERE, "Couldn't load the Contract Market GUI there is an item without any function.");
         if (function.equals("next-page"))
             return new NextPageItem(config);
         if (function.equals("previous-page"))
@@ -54,9 +48,8 @@ public class ContractMarketViewer extends EditableInventory {
         if (function.equals("contract"))
             return new ContractItem(config);
 
-        return null;
+        return new SimpleItem(config);
     }
-
 
     public ContractMarketInventory newInventory(PlayerData playerData, ContractType contractType) {
 
@@ -85,7 +78,7 @@ public class ContractMarketViewer extends EditableInventory {
             Contract contract = inv.displayedContracts.get(inv.page + n);
             ItemMeta itemMeta = item.getItemMeta();
             PersistentDataContainer container = itemMeta.getPersistentDataContainer();
-            container.set(new NamespacedKey(Contracts.plugin, "contract"), PersistentDataType.STRING, contract.getUuid().toString());
+            container.set(new NamespacedKey(Contracts.plugin, "contract"), PersistentDataType.STRING, contract.getId().toString());
             item.setItemMeta(itemMeta);
             return item;
         }
@@ -151,7 +144,7 @@ public class ContractMarketViewer extends EditableInventory {
         public ContractMarketInventory(PlayerData playerData, EditableInventory editable, ContractType contractType) {
             super(playerData, editable);
             this.contractType = contractType;
-            displayedContracts = Contracts.plugin.contractManager.getContractOfType(contractType).stream()
+            displayedContracts = Contracts.plugin.contractManager.getContractsOfType(contractType).stream()
                     .filter(contract -> contract.getState() == ContractState.WAITING_ACCEPTANCE)
                     .sorted((contract1, contract2) -> (int) (contract1.getCreationTime() - contract2.getCreationTime())).collect(Collectors.toList());
             contractsPerPage = getEditable().getByFunction("contract").getSlots().size();

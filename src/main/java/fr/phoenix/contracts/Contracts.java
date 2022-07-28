@@ -1,6 +1,5 @@
 package fr.phoenix.contracts;
 
-import fr.phoenix.contracts.api.ConfigFile;
 import fr.phoenix.contracts.command.ContractTreeRoot;
 import fr.phoenix.contracts.command.ReputationViewerCommand;
 import fr.phoenix.contracts.compat.Metrics;
@@ -8,6 +7,7 @@ import fr.phoenix.contracts.compat.placeholder.DefaultPlaceholderParser;
 import fr.phoenix.contracts.compat.placeholder.PlaceholderParser;
 import fr.phoenix.contracts.listener.PlayerListener;
 import fr.phoenix.contracts.manager.*;
+import fr.phoenix.contracts.utils.ConfigFile;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
@@ -20,7 +20,6 @@ import java.util.logging.Level;
 
 public class Contracts extends JavaPlugin {
     public static Contracts plugin;
-
 
     public Economy economy;
 
@@ -78,8 +77,6 @@ public class Contracts extends JavaPlugin {
         reviewManager.load();
         InventoryManager.load();
         playerManager.load();
-
-
     }
 
     @Override
@@ -87,20 +84,16 @@ public class Contracts extends JavaPlugin {
         plugin = this;
     }
 
-
     @Override
     public void onDisable() {
 
-
-        //Save the managers
+        // Save the managers
         contractManager.save(true);
         playerManager.save(true);
         reviewManager.save(true);
     }
 
-
     public static void log(Level level, String message) {
         plugin.getLogger().log(level, message);
     }
-
 }

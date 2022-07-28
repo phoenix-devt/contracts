@@ -9,7 +9,7 @@ import fr.phoenix.contracts.gui.objects.item.InventoryItem;
 import fr.phoenix.contracts.gui.objects.item.Placeholders;
 import fr.phoenix.contracts.gui.objects.item.SimpleItem;
 import fr.phoenix.contracts.player.PlayerData;
-import fr.phoenix.contracts.review.ContractReview;
+import fr.phoenix.contracts.contract.review.ContractReview;
 import fr.phoenix.contracts.utils.ContractsUtils;
 import fr.phoenix.contracts.utils.message.Message;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -147,7 +147,7 @@ public class ContractPortfolioViewer extends EditableInventory {
             }
             ItemMeta itemMeta = item.getItemMeta();
             PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
-            container.set(new NamespacedKey(Contracts.plugin, "contract"), PersistentDataType.STRING, contract.getUuid().toString());
+            container.set(new NamespacedKey(Contracts.plugin, "contract"), PersistentDataType.STRING, contract.getId().toString());
             item.setItemMeta(itemMeta);
             return item;
         }

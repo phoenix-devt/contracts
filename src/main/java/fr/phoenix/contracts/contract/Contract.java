@@ -1,51 +1,57 @@
-package fr.lezoo.contracts.contract;
+package fr.phoenix.contracts.contract;
 
-import fr.lezoo.contracts.Contracts;
-import fr.lezoo.contracts.event.ContractStateChangeEvent;
-import fr.lezoo.contracts.gui.objects.GeneratedInventory;
-import fr.lezoo.contracts.player.PlayerData;
-import fr.lezoo.contracts.utils.ChatInput;
-import fr.lezoo.contracts.utils.ContractsUtils;
-import fr.lezoo.contracts.utils.message.Message;
+import fr.phoenix.contracts.Contracts;
+import fr.phoenix.contracts.api.event.ContractStateChangeEvent;
+import fr.phoenix.contracts.gui.objects.GeneratedInventory;
+import fr.phoenix.contracts.player.PlayerData;
+import fr.phoenix.contracts.utils.ChatInput;
+import fr.phoenix.contracts.utils.ContractsUtils;
+import fr.phoenix.contracts.utils.message.Message;
+import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.entity.PlayerDeathEvent;
-import org.checkerframework.checker.units.qual.C;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 
 public abstract class Contract {
     protected final UUID contractId;
+    protected final ContractType type;
     protected String name;
-    //The employer creates the contract and the employee tries to fulfill it
+    // The employer creates the contract and the employee tries to fulfill it
     protected final UUID employer;
-    //Not final
+    // Not final
     protected UUID employee;
     protected double amount;
     protected ContractState state;
     private long creationTime, acceptanceTime, endTime;
 
-    //Hashmap to store all the parameters that need to be setup and to check if it has been setup
+    // Hashmap to store all the parameters that need to be setup and to check if it has been setup
+    protected final List<String> parametersList = new ArrayList<>();
     private final HashMap<String, BiConsumer<Player, String>> parameters = new HashMap<>();
-    protected List<String> parametersList = new ArrayList<>();
 
-    //Map all the filledParameters with their value
+    // Map all the filledParameters with their value
     protected final HashMap<String, String> filledParameters = new HashMap<>();
 
-    public Contract(UUID employer) {
+    public Contract(ContractType type, UUID employer) {
         contractId = UUID.randomUUID();
+        this.type = type;
         this.employer = employer;
         state = ContractState.OPEN;
         creationTime = System.currentTimeMillis();
+
         addParameter("name", (p, str) -> {
                     name = str;
                     filledParameters.put("name", str);
                 }
         );
+
         addParameter("payment-amount", (p, str) -> {
             try {
                 setAmount(Double.parseDouble(str));
@@ -57,7 +63,8 @@ public abstract class Contract {
 
     }
 
-    public Contract(ConfigurationSection section) {
+    public Contract(ContractType type, ConfigurationSection section) {
+        this.type = type;
         name = section.getString("name");
         contractId = UUID.fromString(section.getName());
         employee = section.getString("employee") == null ? null : UUID.fromString(section.getString("employee"));
@@ -69,20 +76,18 @@ public abstract class Contract {
         endTime = section.contains("end-time") ? section.getLong("end-time") : 0;
     }
 
-
     public List<String> getParametersList() {
         return parametersList;
     }
 
     /**
-     * This method is very important, it is used to have an ordered list representing the parameters for the gui.
+     * This method is very important, it is used to have an
+     * ordered list representing the parameters for the gui.
      */
     protected void addParameter(String str, BiConsumer<Player, String> consumer) {
         parameters.put(str, consumer);
         parametersList.add(str);
     }
-
-
 
     public void openChatInput(String str, PlayerData playerData, GeneratedInventory inv) {
         //If the player is already on chat input we block the access to a new chat input.
@@ -94,8 +99,7 @@ public abstract class Contract {
         new ChatInput(playerData, inv, (p, val) -> {
             parameters.get(str).accept(p.getPlayer(), val);
             return true;
-        }
-        );
+        });
     }
 
     public String getFilledParameter(String str) {
@@ -122,12 +126,13 @@ public abstract class Contract {
     public void createContract() {
         state = ContractState.WAITING_ACCEPTANCE;
         Message.CREATED_CONTRACT.format("contract-name", name).send(Bukkit.getPlayer(employer));
-        Contracts.plugin.contractManager.addContract(this);
+        Contracts.plugin.contractManager.registerContract(this);
         PlayerData.get(employer).addContract(this);
     }
 
-    ;
-
+    public ContractType getType() {
+        return type;
+    }
 
     public void setName(String name) {
         this.name = name;
@@ -141,7 +146,7 @@ public abstract class Contract {
         this.amount = amount;
     }
 
-    public UUID getUuid() {
+    public UUID getId() {
         return contractId;
     }
 
@@ -182,11 +187,11 @@ public abstract class Contract {
     }
 
     /**
-     * Method called when a player approves and accept a contract and becomes employed for it.
-     *
-     * @param employeeId
+     * Method called when a player approves and accepts a contract.
      */
     public void whenAccepted(UUID employeeId) {
+        Validate.isTrue(state == ContractState.OPEN, "Contract is not open");
+
         acceptanceTime = System.currentTimeMillis();
         employee = employeeId;
         changeContractState(ContractState.OPEN);
@@ -214,15 +219,37 @@ public abstract class Contract {
         config.set(str + ".creation-time", creationTime);
         config.set(str + ".acceptance-time", acceptanceTime);
         config.set(str + ".end-time", endTime);
-
     }
-    //TODO
 
     /**
      * Calls a middle man because there is a dispute with the contract.
      */
     public void callDispute() {
+        //TODO
 
+        /*
+                   if (employeePlayer != null)
+                    Message.CONTRACT_DISPUTED.format("contract-name", name, "other", employerPlayer.getName())
+                            .send(employeePlayer.getPlayer());
+                if (employerPlayer != null)
+                    Message.CONTRACT_DISPUTED.format("contract-name", name, "other", employeePlayer.getName())
+                            .send(employerPlayer.getPlayer());
+         */
+    }
+
+    /**
+     * Requires employee to be online
+     */
+    public void completeContract(Player employee) {
+        Validate.isTrue(state == ContractState.OPEN, "Contract is not open");
+        changeContractState(ContractState.FULFILLED);
+
+        Player employer = Bukkit.getPlayer(this.employer);
+        if (employer != null)
+            Message.CONTRACT_FULFILLED.format("contract-name", name, "other", employee.getName()).send(employer);
+        Message.CONTRACT_FULFILLED.format("contract-name", name, "other", employer.getName()).send(employee);
+        // The employer is now in debt of the player
+        Contracts.plugin.debtManager.addDebt(this.employer, this.employee, amount);
     }
 
 
@@ -232,38 +259,9 @@ public abstract class Contract {
         //We change the state of the contract and add it to contractsToReview
         state = newState;
 
-
-
         //Do the processing with that change and send the messages to the players.
-        OfflinePlayer employeePlayer=employee==null?null:Bukkit.getOfflinePlayer(employee);
-        OfflinePlayer employerPlayer=employer==null?null:Bukkit.getOfflinePlayer(employer);
-        switch(newState) {
-            case FULFILLED:
-                if(employeePlayer!=null)
-                    Message.CONTRACT_FULFILLED.format("contract-name",name,"other",employerPlayer.getName())
-                            .send(employeePlayer.getPlayer());
-                if(employerPlayer!=null)
-                    Message.CONTRACT_FULFILLED.format("contract-name",name,"other",employeePlayer.getName())
-                            .send(employerPlayer.getPlayer());
-                //The employer is now in debt of the player
-                Contracts.plugin.debtManager.addDebt(employer,employee,amount);
-                break;
-
-            case DISPUTED:
-                if(employeePlayer!=null)
-                    Message.CONTRACT_DISPUTED.format("contract-name",name,"other",employerPlayer.getName())
-                            .send(employeePlayer.getPlayer());
-                if(employerPlayer!=null)
-                    Message.CONTRACT_DISPUTED.format("contract-name",name,"other",employeePlayer.getName())
-                            .send(employerPlayer.getPlayer());
-                break;
-            case OPEN:
-                if(employerPlayer!=null)
-                    Message.EMPLOYER_CONTRACT_ACCEPTED.format("contract-name",name,"player-name",employeePlayer.getName())
-                            .send(employerPlayer.getPlayer());
-                break;
-        }
-
+        OfflinePlayer employeePlayer = employee == null ? null : Bukkit.getOfflinePlayer(employee);
+        OfflinePlayer employerPlayer = employer == null ? null : Bukkit.getOfflinePlayer(employer);
 
     }
 }

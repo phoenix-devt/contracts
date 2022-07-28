@@ -1,6 +1,6 @@
 package fr.phoenix.contracts.manager;
 
-import fr.phoenix.contracts.api.ConfigFile;
+import fr.phoenix.contracts.utils.ConfigFile;
 import fr.phoenix.contracts.player.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;

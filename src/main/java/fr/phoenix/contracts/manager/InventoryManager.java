@@ -1,8 +1,8 @@
 package fr.phoenix.contracts.manager;
 
 import fr.phoenix.contracts.Contracts;
-import fr.phoenix.contracts.api.ConfigFile;
-import fr.lezoo.contracts.gui.*;
+import fr.phoenix.contracts.utils.ConfigFile;
+import fr.phoenix.contracts.gui.*;
 import fr.phoenix.contracts.gui.objects.EditableInventory;
 import fr.phoenix.contracts.gui.*;
 

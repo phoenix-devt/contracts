@@ -1,33 +1,33 @@
 package fr.phoenix.contracts.contract;
 
-import fr.phoenix.contracts.contract.classic.ExchangeContract;
-import fr.phoenix.contracts.contract.classic.KillContract;
-import fr.phoenix.contracts.contract.permanent.LendingContract;
-import fr.phoenix.contracts.contract.permanent.SalaryContract;
+import fr.phoenix.contracts.contract.list.ExchangeContract;
+import fr.phoenix.contracts.contract.list.KillContract;
+import fr.phoenix.contracts.contract.list.LendingContract;
+import fr.phoenix.contracts.contract.list.SalaryContract;
+import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.UUID;
 import java.util.function.Function;
 
 public enum ContractType {
-    KILL((uuid)->new KillContract(uuid),(c)->c instanceof KillContract),
-    EXCHANGE((uuid)->new ExchangeContract(uuid),(c)->c instanceof ExchangeContract),
-    SALARY((uuid)->new SalaryContract(uuid),(c)->c instanceof SalaryContract),
-    LENDING((uuid)->new LendingContract(uuid),(c)->c instanceof LendingContract);
+    KILL(KillContract::new, KillContract::new),
+    EXCHANGE(ExchangeContract::new, ExchangeContract::new),
+    SALARY(SalaryContract::new, SalaryContract::new),
+    LENDING(LendingContract::new, LendingContract::new);
 
-    private final Function<UUID,? extends Contract> provider;
-    private final Function<Contract,Boolean> filter;
+    private final Function<UUID, Contract> initializer;
+    private final Function<ConfigurationSection, Contract> loader;
 
-    ContractType(Function<UUID,Contract> provider,Function<Contract,Boolean> filter) {
-        this.provider = provider;
-        this.filter=filter;
+    ContractType(Function<UUID, Contract> initializer, Function<ConfigurationSection, Contract> loader) {
+        this.initializer = initializer;
+        this.loader = loader;
     }
 
-    public Contract provide(UUID uuid) {
-        return provider.apply(uuid);
+    public Contract instanciate(UUID uuid) {
+        return initializer.apply(uuid);
     }
 
-    public boolean filter(Contract contract) {
-        return filter.apply(contract);
+    public Contract loadFromConfig(ConfigurationSection config) {
+        return loader.apply(config);
     }
-
 }

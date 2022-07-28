@@ -1,10 +1,10 @@
 package fr.phoenix.contracts.player;
 
 import fr.phoenix.contracts.Contracts;
-import fr.phoenix.contracts.api.ConfigFile;
+import fr.phoenix.contracts.utils.ConfigFile;
 import fr.phoenix.contracts.contract.Contract;
 import fr.phoenix.contracts.contract.ContractState;
-import fr.phoenix.contracts.review.ContractReview;
+import fr.phoenix.contracts.contract.review.ContractReview;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -17,16 +17,24 @@ public class PlayerData {
     private final String playerName;
     private Player player;
     private boolean onChatInput;
-    //We want to keep the order in which contracts where inserted
-    private final Map<UUID, Contract> contracts = new HashMap<>();
 
-    //It is used only for the middleman not for the others
+    /**
+     * Keep the order in which contracts where inserted
+     */
+    private final Map<UUID, Contract> contracts = new LinkedHashMap<>();
+
+    /**
+     * Used only for the middleman, not for the others
+     */
     private final Map<UUID,Contract> middlemanContracts= new HashMap<>();
 
+    private final Map<UUID, Double> debts = new HashMap<>();
 
-
-    //All the reviews about this player
+    /**
+     * All the reviews about the player
+     */
     private final Map<UUID, ContractReview> contractReviews = new LinkedHashMap<>();
+
     private int numberReviews;
     private double meanNotation;
 
@@ -61,7 +69,7 @@ public class PlayerData {
     }
 
     public void addContract(Contract contract) {
-        contracts.put(contract.getUuid(), contract);
+        contracts.put(contract.getId(), contract);
     }
 
     public void addReview(ContractReview review) {
@@ -79,14 +87,14 @@ public class PlayerData {
         //We load the contracts
         for (String key : config.getStringList("contracts")) {
             Contract contract = Contracts.plugin.contractManager.get(UUID.fromString(key));
-            contracts.put(contract.getUuid(), contract);
+            contracts.put(contract.getId(), contract);
         }
 
 
         //We load the middleman contracts
         for (String key : config.getStringList("middleman-contracts")) {
             Contract contract = Contracts.plugin.contractManager.get(UUID.fromString(key));
-            middlemanContracts.put(contract.getUuid(), contract);
+            middlemanContracts.put(contract.getId(), contract);
         }
 
 
@@ -108,13 +116,6 @@ public class PlayerData {
     public List<Contract> getContracts(ContractState... states) {
         return contracts.values().stream().filter(contract -> Arrays.asList(states).contains(contract.getState())).sorted((contract1, contract2) -> (int) (contract1.isEnded() ? contract1.getEndTime() - contract2.getEndTime()
                 : contract1.getCreationTime() - contract2.getCreationTime())).collect(Collectors.toList());
-    }
-
-    /**
-     * Gets all the contracts with the state matching the contractStates given in argument.
-     */
-    public List<Contract> getMiddlemanContracts(ContractState... states) {
-        return middlemanContracts.values().stream().filter(contract -> Arrays.asList(states).contains(contract.getState())).sorted((contract1, contract2) -> contract1.getCreationTime()).collect(Collectors.toList());
     }
 
     public static boolean has(UUID uuid) {

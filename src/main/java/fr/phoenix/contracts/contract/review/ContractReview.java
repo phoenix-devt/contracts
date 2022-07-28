@@ -1,4 +1,4 @@
-package fr.phoenix.contracts.review;
+package fr.phoenix.contracts.contract.review;
 
 import fr.phoenix.contracts.Contracts;
 import fr.phoenix.contracts.contract.Contract;
@@ -7,54 +7,50 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
 
 /**
  *
  */
 public class ContractReview {
     private final long reviewDate;
-    private final UUID reviewId, contractId, reviewed,reviewer;
-    private int notation;
-    private List<String> comment;
+    private final UUID reviewId, contractId, reviewed, reviewer;
+    private final List<String> comment;
 
+    private int notation;
 
     public ContractReview(ConfigurationSection section) {
-        reviewDate=section.getLong("date");
-        reviewId=UUID.fromString(section.getName());
+        reviewDate = section.getLong("date");
+        reviewId = UUID.fromString(section.getName());
         contractId = UUID.fromString(section.getString("contract-id"));
         reviewed = UUID.fromString(section.getString("reviewed"));
-        reviewer= UUID.fromString(section.getString("reviewer"));
-        notation=section.getInt("notation");
-        comment=section.getStringList("comment");
-
+        reviewer = UUID.fromString(section.getString("reviewer"));
+        notation = section.getInt("notation");
+        comment = section.getStringList("comment");
     }
 
-    public ContractReview(UUID reviewed,UUID reviewer, Contract contract, int notation, List<String> comment) {
-        reviewDate=System.currentTimeMillis();
-        reviewId=UUID.randomUUID();
+    public ContractReview(UUID reviewed, UUID reviewer, Contract contract, int notation, List<String> comment) {
+        reviewDate = System.currentTimeMillis();
+        reviewId = UUID.randomUUID();
         this.reviewed = reviewed;
         this.reviewer = reviewer;
-        this.contractId = contract.getUuid();
+        this.contractId = contract.getId();
         this.notation = notation;
         this.comment = comment;
     }
 
-
     public void saveInConfig(FileConfiguration config) {
-        config.set(reviewId+".date",reviewDate);
-        config.set(reviewId+".contract-id",contractId);
-        config.set(reviewId+".reviewed",reviewed);
-        config.set(reviewId+".reviewer",reviewer);
-        config.set(reviewId+".notation",notation);
-        config.set(reviewId+".comment",comment);
+        config.set(reviewId + ".date", reviewDate);
+        config.set(reviewId + ".contract-id", contractId);
+        config.set(reviewId + ".reviewed", reviewed);
+        config.set(reviewId + ".reviewer", reviewer);
+        config.set(reviewId + ".notation", notation);
+        config.set(reviewId + ".comment", comment);
     }
 
     public void removeComment() {
-        comment=new ArrayList<>();
+        comment.clear();
     }
 
     public void setNotation(int notation) {

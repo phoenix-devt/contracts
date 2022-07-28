@@ -38,7 +38,7 @@ public class ContractCreationViewer extends EditableInventory {
             return new CreateItem(config);
         if(function.equals("parameter"))
             return new ParameterItem(config);
-        return null;
+        return new SimpleItem(config);
     }
 
     public ContractCreationInventory newInventory(PlayerData playerData, ContractType contractType) {
@@ -152,7 +152,7 @@ public class ContractCreationViewer extends EditableInventory {
             super(playerData, editable);
             this.contractType = contractType;
             //We load the contract and enable the modification of its parameters
-            contract = contractType.provide(playerData.getUuid());
+            contract = contractType.instanciate(playerData.getUuid());
             parametersList = contract.getParametersList();
         }
 

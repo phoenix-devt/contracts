@@ -1,4 +1,4 @@
-package fr.phoenix.contracts.api;
+package fr.phoenix.contracts.utils;
 
 import fr.phoenix.contracts.Contracts;
 import org.bukkit.configuration.file.FileConfiguration;

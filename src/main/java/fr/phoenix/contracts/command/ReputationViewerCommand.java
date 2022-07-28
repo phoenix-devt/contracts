@@ -2,7 +2,7 @@ package fr.phoenix.contracts.command;
 
 import fr.phoenix.contracts.Contracts;
 import fr.phoenix.contracts.player.PlayerData;
-import fr.phoenix.contracts.review.ContractReview;
+import fr.phoenix.contracts.contract.review.ContractReview;
 import fr.phoenix.contracts.utils.InputHandler;
 import fr.phoenix.contracts.utils.ReviewChatInput;
 import fr.phoenix.contracts.utils.message.Message;
@@ -37,7 +37,7 @@ public class ReputationViewerCommand extends BukkitCommand {
         if (!(sender instanceof Player))
             return false;
 
-        ContractReview review = null;
+        ContractReview review;
         try {
             //throws NullPointerException if null)
             review = Objects.requireNonNull(Contracts.plugin.reviewManager.get(UUID.fromString(args[1])));

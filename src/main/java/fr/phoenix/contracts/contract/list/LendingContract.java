@@ -1,8 +1,10 @@
-package fr.lezoo.contracts.contract.permanent;
+package fr.phoenix.contracts.contract.list;
 
-import fr.lezoo.contracts.Contracts;
-import fr.lezoo.contracts.contract.ContractState;
-import fr.lezoo.contracts.utils.message.Message;
+import fr.phoenix.contracts.Contracts;
+import fr.phoenix.contracts.contract.Contract;
+import fr.phoenix.contracts.contract.ContractState;
+import fr.phoenix.contracts.contract.ContractType;
+import fr.phoenix.contracts.utils.message.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -13,7 +15,7 @@ import java.util.UUID;
  * Here the "employee" is the lender and the "employer" the borrower because it is the lender who first create
  * The paiement info correspond to the initial paiement being made
  */
-public class LendingContract extends PermanentContract {
+public class LendingContract extends Contract {
     //period between each refund in hours
     //numberRefunds is the number of time there need to be a refund and refunds made correspond to the refunds already made
     private int interestPeriod, interestRate, numberRefunds;
@@ -23,7 +25,7 @@ public class LendingContract extends PermanentContract {
 
 
     public LendingContract(ConfigurationSection section) {
-        super(section);
+        super(ContractType.LENDING, section);
         interestPeriod = section.getInt("period");
         interestRate = section.getInt("interest-rate");
         numberRefunds = section.getInt("number-refunds");
@@ -40,7 +42,7 @@ public class LendingContract extends PermanentContract {
 
 
     public LendingContract(UUID employer) {
-        super(employer);
+        super(ContractType.LENDING, employer);
 
         addParameter("interest-period", (p, str) -> {
             try {

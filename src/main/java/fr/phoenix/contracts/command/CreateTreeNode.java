@@ -8,6 +8,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class CreateTreeNode extends CommandTreeNode {
+
     /**
      * Creates a command tree node which a specific parent and id
      *
@@ -19,15 +20,14 @@ public class CreateTreeNode extends CommandTreeNode {
 
     @Override
     public CommandResult execute(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player))
             return CommandResult.FAILURE;
-        }
+
         if (args.length != 1)
             return CommandResult.FAILURE;
 
         Player player = (Player) sender;
         InventoryManager.CONTRACT_TYPE.newInventory(PlayerData.get(player.getUniqueId()), ContractTypeViewer.InventoryToOpenType.CREATION_VIEWER).open();
-
         return CommandResult.SUCCESS;
     }
 }

@@ -3,7 +3,7 @@ package fr.phoenix.contracts.utils;
 import fr.phoenix.contracts.Contracts;
 import fr.phoenix.contracts.gui.ContractPortfolioViewer;
 import fr.phoenix.contracts.player.PlayerData;
-import fr.phoenix.contracts.review.ContractReview;
+import fr.phoenix.contracts.contract.review.ContractReview;
 import fr.phoenix.contracts.utils.message.Message;
 
 public class InputHandler {

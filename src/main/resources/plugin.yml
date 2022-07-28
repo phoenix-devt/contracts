@@ -1,5 +1,5 @@
 name: Contracts
-main: fr.lezoo.contracts.Contracts
+main: fr.phoenix.contracts.Contracts
 version: 1.0.0
 api-version: 1.13
 commands:

@@ -1,14 +1,11 @@
-package fr.lezoo.contracts.manager;
+package fr.phoenix.contracts.manager;
 
-import fr.lezoo.contracts.Contracts;
-import fr.lezoo.contracts.contract.Contract;
-import fr.lezoo.contracts.contract.debt.DebtInfo;
-import fr.lezoo.contracts.player.PlayerData;
-import fr.lezoo.contracts.utils.message.Message;
+import fr.phoenix.contracts.contract.debt.DebtInfo;
+import fr.phoenix.contracts.Contracts;
+import fr.phoenix.contracts.utils.message.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
 import java.util.HashMap;

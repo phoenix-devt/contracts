@@ -1,43 +1,43 @@
-package fr.lezoo.contracts.contract.classic;
+package fr.phoenix.contracts.contract.list;
 
-import fr.lezoo.contracts.Contracts;
-import fr.lezoo.contracts.contract.ContractState;
-import fr.lezoo.contracts.contract.ContractType;
-import fr.lezoo.contracts.utils.message.Message;
+import fr.phoenix.contracts.Contracts;
+import fr.phoenix.contracts.contract.Contract;
+import fr.phoenix.contracts.contract.ContractState;
+import fr.phoenix.contracts.contract.ContractType;
+import fr.phoenix.contracts.utils.message.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 
 import java.util.UUID;
 
-public class KillContract extends ClassicContract {
+public class KillContract extends Contract implements Listener {
     private UUID playerToKill;
 
-
     public KillContract(ConfigurationSection section) {
-        super(section);
+        super(ContractType.KILL, section);
+
         playerToKill = UUID.fromString(section.getString("player-to-kill"));
     }
 
-
     public KillContract(UUID employer) {
-        super(employer);
+        super(ContractType.KILL, employer);
+
         //We register the new parameter to set
         addParameter("player-to-kill", (p, str) -> {
                     if (Contracts.plugin.playerManager.has(str)) {
                         playerToKill = Contracts.plugin.playerManager.get(str);
-                        filledParameters.put("player-to-kill",str);
-                    }
-                    else
-                        Message.NOT_VALID_PLAYER.format("input",str).send(p);
+                        filledParameters.put("player-to-kill", str);
+                    } else
+                        Message.NOT_VALID_PLAYER.format("input", str).send(p);
                 }
         );
     }
-
 
 
     @EventHandler
@@ -56,7 +56,7 @@ public class KillContract extends ClassicContract {
         super.save(config);
         String str = contractId.toString();
         //Very important to set the type in the yml
-        config.set(str+".type", ContractType.KILL.toString());
+        config.set(str + ".type", ContractType.KILL.toString());
         config.set(str + ".player-to-kill", playerToKill.toString());
     }
 }

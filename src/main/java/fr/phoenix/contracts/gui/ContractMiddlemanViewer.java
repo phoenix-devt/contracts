@@ -1,19 +1,18 @@
-package fr.lezoo.contracts.gui;
+package fr.phoenix.contracts.gui;
 
-import fr.lezoo.contracts.Contracts;
-import fr.lezoo.contracts.contract.Contract;
-import fr.lezoo.contracts.contract.ContractState;
-import fr.lezoo.contracts.contract.ContractType;
-import fr.lezoo.contracts.gui.objects.EditableInventory;
-import fr.lezoo.contracts.gui.objects.GeneratedInventory;
-import fr.lezoo.contracts.gui.objects.item.InventoryItem;
-import fr.lezoo.contracts.gui.objects.item.Placeholders;
-import fr.lezoo.contracts.gui.objects.item.SimpleItem;
-import fr.lezoo.contracts.manager.InventoryManager;
-import fr.lezoo.contracts.player.PlayerData;
-import fr.lezoo.contracts.utils.ChatInput;
-import fr.lezoo.contracts.utils.ContractsUtils;
-import fr.lezoo.contracts.utils.message.Message;
+import fr.phoenix.contracts.Contracts;
+import fr.phoenix.contracts.contract.Contract;
+import fr.phoenix.contracts.contract.ContractState;
+import fr.phoenix.contracts.gui.objects.EditableInventory;
+import fr.phoenix.contracts.gui.objects.GeneratedInventory;
+import fr.phoenix.contracts.gui.objects.item.InventoryItem;
+import fr.phoenix.contracts.gui.objects.item.Placeholders;
+import fr.phoenix.contracts.gui.objects.item.SimpleItem;
+import fr.phoenix.contracts.manager.InventoryManager;
+import fr.phoenix.contracts.player.PlayerData;
+import fr.phoenix.contracts.utils.ChatInput;
+import fr.phoenix.contracts.utils.ContractsUtils;
+import fr.phoenix.contracts.utils.message.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -47,8 +46,8 @@ public class ContractMiddlemanViewer extends EditableInventory {
             return new NextPageItem(config);
         if (function.equals("previous-page"))
             return new PreviousPageItem(config);
-        if (function.equals("switch"))
-            return new SwitchItem(config);
+     /*   if (function.equals("switch"))
+            return new SwitchItem(config);*/
         if (function.equals("contract"))
             return new ContractItem(config);
 
@@ -78,7 +77,6 @@ public class ContractMiddlemanViewer extends EditableInventory {
             return true;
         }
 
-
         @Override
         public ItemStack getDisplayedItem(ContractMiddlemanInventory inv, int n) {
             if (inv.page + n >= inv.displayedContracts.size())
@@ -87,7 +85,7 @@ public class ContractMiddlemanViewer extends EditableInventory {
             Contract contract = inv.displayedContracts.get(inv.page + n);
             ItemMeta itemMeta = item.getItemMeta();
             PersistentDataContainer container = itemMeta.getPersistentDataContainer();
-            container.set(new NamespacedKey(Contracts.plugin, "contract"), PersistentDataType.STRING, contract.getUuid().toString());
+            container.set(new NamespacedKey(Contracts.plugin, "contract"), PersistentDataType.STRING, contract.getId().toString());
             item.setItemMeta(itemMeta);
             return item;
         }
@@ -107,14 +105,12 @@ public class ContractMiddlemanViewer extends EditableInventory {
         }
     }
 
-
     public class GoBackItem extends SimpleItem<ContractMiddlemanInventory> {
 
         public GoBackItem(ConfigurationSection config) {
             super(config);
         }
     }
-
 
     public class PreviousPageItem extends SimpleItem<ContractMiddlemanInventory> {
 
@@ -141,7 +137,6 @@ public class ContractMiddlemanViewer extends EditableInventory {
         }
     }
 
-
     public class ContractMiddlemanInventory extends GeneratedInventory {
         private boolean ownContracts;
         private int page = 0;
@@ -149,10 +144,10 @@ public class ContractMiddlemanViewer extends EditableInventory {
         private final List<Contract> displayedContracts;
         private int maxPage;
 
-        public ContractMiddlemanInventory(PlayerData playerData, EditableInventory editable, MiddleManContractType ownContracts) {
+        public ContractMiddlemanInventory(PlayerData playerData, EditableInventory editable, boolean ownContracts) {
             super(playerData, editable);
             this.ownContracts = ownContracts;
-            displayedContracts = Contracts.plugin.contractManager.getContractOfState(C).stream()
+            displayedContracts = Contracts.plugin.contractManager.getContractsOfState(ContractState.OPEN /* TODO */).stream()
                     .filter(contract -> contract.getState() == ContractState.WAITING_ACCEPTANCE)
                     .sorted((contract1, contract2) -> (int) (contract1.getCreationTime() - contract2.getCreationTime())).collect(Collectors.toList());
             contractsPerPage = getEditable().getByFunction("contract").getSlots().size();
@@ -163,7 +158,7 @@ public class ContractMiddlemanViewer extends EditableInventory {
 
         @Override
         public String applyNamePlaceholders(String str) {
-            return str.replace("{type}", ContractsUtils.chatName(contractType.toString()));
+            return str.replace("{type}", ContractsUtils.chatName(/* contractType.toString() */ "AHEM")); // TODO
         }
 
         @Override
@@ -221,14 +216,22 @@ public class ContractMiddlemanViewer extends EditableInventory {
 
 
     public enum MiddlemanContractType {
-        //Contract with is a dispute but with no middle man engaged
-        WAITING_MIDDLEMAN_CONTRACT(playerData -> Contracts.plugin.contractManager.getContractOfState(ContractState.WAITING_MIDDLEMAN)
-                .stream().sorted((contract1, contract2) -> (int) (contract1.getCreationTime() - contract2.getCreationTime())).collect(Collectors.toList()))
-        ,
-        //The contracts of a middle man
-        OWN_CONTRACT(playerData -> playerData.)
-        //The admin disputed contracts of a middle man
-        ,OWN_ADMIN_DISPUTED_CONTRACT;
+
+        /**
+         * Contract with is a dispute but with no middle man engaged
+         */
+        WAITING_MIDDLEMAN_CONTRACT(playerData -> Contracts.plugin.contractManager.getContractsOfState(ContractState.WAITING_MIDDLEMAN)
+                .stream().sorted((contract1, contract2) -> (int) (contract1.getCreationTime() - contract2.getCreationTime())).collect(Collectors.toList())),
+
+        /**
+         * The contracts of a middle man
+         */
+        OWN_CONTRACT(null), // TODO
+
+        /**
+         * The admin disputed contracts of a middle man
+         */
+        OWN_ADMIN_DISPUTED_CONTRACT(null); // TODO
 
 
         private final Function<PlayerData, List<Contract>> contractProvider;

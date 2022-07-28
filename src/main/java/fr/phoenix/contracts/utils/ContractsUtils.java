@@ -6,8 +6,6 @@ import org.bukkit.ChatColor;
 import java.util.Arrays;
 
 public class ContractsUtils {
-
-
     public static String applyColorCode(String str) {
         return ChatColor.translateAlternateColorCodes(Contracts.plugin.configManager.colorCodeChar,str);
     }
@@ -26,8 +24,6 @@ public class ContractsUtils {
     public static String enumName(String str) {
         return str.toUpperCase().replace("-", "_");
     }
-
-
 
     public static String chatName(String str) {
         StringBuilder result = new StringBuilder();

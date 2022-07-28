@@ -1,7 +1,7 @@
 package fr.phoenix.contracts.manager;
 
-import fr.phoenix.contracts.api.ConfigFile;
-import fr.phoenix.contracts.review.ContractReview;
+import fr.phoenix.contracts.utils.ConfigFile;
+import fr.phoenix.contracts.contract.review.ContractReview;
 
 import java.util.HashMap;
 import java.util.UUID;
