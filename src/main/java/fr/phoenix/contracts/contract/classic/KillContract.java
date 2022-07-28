@@ -1,9 +1,9 @@
-package fr.phoenix.contracts.contract.classic;
+package fr.lezoo.contracts.contract.classic;
 
-import fr.phoenix.contracts.Contracts;
-import fr.phoenix.contracts.contract.ContractState;
-import fr.phoenix.contracts.contract.ContractType;
-import fr.phoenix.contracts.utils.message.Message;
+import fr.lezoo.contracts.Contracts;
+import fr.lezoo.contracts.contract.ContractState;
+import fr.lezoo.contracts.contract.ContractType;
+import fr.lezoo.contracts.utils.message.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;

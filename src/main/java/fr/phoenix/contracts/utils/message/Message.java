@@ -8,10 +8,17 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum Message {
-    CONTRACT_REFUSED("&cYou refused the contract &6{contract-name}&e."),
+    RECEIVED_DEPT("&6{from}&a reimbursed you &8{amount}&a !"),
+    PAYED_DEBT("&cYou reimbursed &8{amount}&c to &6{to}&c !"),
 
-    CONTRACT_ACCEPTED("&aCongratulations you accepted the contract &6{contract-name}&a."),
+    CANT_ACCEPT_OWN_CONTRACT("&cYou can't accept your own contract!"),
+    CONTRACT_REFUSED("&cYou refused the contract &6{contract-name}&c."),
 
+    EMPLOYER_CONTRACT_ACCEPTED("&aCongratulations your contract &6{contract-name} was just accepted by &6{player-name}&a."),
+
+    EMPLOYEE_CONTRACT_ACCEPTED("&aCongratulations you accepted the contract &6{contract-name}&a."),
+    CONTRACT_DISPUTED("&cThe contract &6{contract-name}&a with &6{other}&c is now under dispute."),
+    CONTRACT_FULFILLED("&aThe contract &6{contract-name}&a with &6{other}&a is now fulfilled!"),
     ARE_YOU_SURE_TO_ACCEPT("&eType 'yes' to accept the contract &6{contract-name}&7."),
 
     CREATED_CONTRACT("&aCongratulations you created the contract &6{contract-name}&a."),
@@ -28,6 +35,7 @@ public enum Message {
     NOT_VALID_PAYMENT_TYPE("&c{input} is not a payment type, payment type can be MONEY."),
 
     NOT_VALID_PLAYER("&c{input} is not a valid player."),
+    NOT_VALID_MATERIAL("&c{input} is not a valid player."),
 
     MISSING_CONTRACT_PARAMETER("&cYou can't create the contract yet, some parameters are missing."),
 

@@ -48,11 +48,10 @@ public class ContractPortfolioViewer extends EditableInventory {
             return new ChangeViewItem(config);
         return null;
     }
+
     public ContractPortfolioInventory newInventory(PlayerData playerData) {
-        return new ContractPortfolioInventory(playerData,this);
+        return new ContractPortfolioInventory(playerData, this);
     }
-
-
 
 
     public class ChangeViewItem extends InventoryItem<ContractPortfolioInventory> {
@@ -60,7 +59,7 @@ public class ContractPortfolioViewer extends EditableInventory {
 
         public ChangeViewItem(ConfigurationSection config) {
             super(config);
-            this.config=config;
+            this.config = config;
         }
 
         @Override
@@ -71,15 +70,14 @@ public class ContractPortfolioViewer extends EditableInventory {
         @Override
         public ItemStack getDisplayedItem(ContractPortfolioInventory inv, int n) {
             ViewState viewState = inv.otherViewStates.get(n);
-            Material displayMaterial=Material.AIR;
-            try{
-                displayMaterial= Objects.requireNonNull(Material.valueOf(ContractsUtils.enumName(config.getString("material"+(n+1)))));
-            }
-            catch (Exception e) {
-                Contracts.plugin.getLogger().log(Level.WARNING,"Couldn't load material"+(n+1)+":"+config.getString("material"+(n+1))+" for the change view item of the contracts gui");
+            Material displayMaterial = Material.AIR;
+            try {
+                displayMaterial = Objects.requireNonNull(Material.valueOf(ContractsUtils.enumName(config.getString("material" + (n + 1)))));
+            } catch (Exception e) {
+                Contracts.plugin.getLogger().log(Level.WARNING, "Couldn't load material" + (n + 1) + ":" + config.getString("material" + (n + 1)) + " for the change view item of the contracts gui");
             }
 
-            ItemStack item = super.getDisplayedItem(inv, n,displayMaterial);
+            ItemStack item = super.getDisplayedItem(inv, n, displayMaterial);
             ItemMeta meta = item.getItemMeta();
             PersistentDataContainer container = meta.getPersistentDataContainer();
             container.set(new NamespacedKey(Contracts.plugin, "view-state"), PersistentDataType.STRING, viewState.toString());
@@ -105,7 +103,7 @@ public class ContractPortfolioViewer extends EditableInventory {
 
         public ContractItem(ConfigurationSection config) {
             super(config);
-            Material material=Material.valueOf(Objects.requireNonNull(ContractsUtils.enumName(config.getString("item"))));
+            Material material = Material.valueOf(Objects.requireNonNull(ContractsUtils.enumName(config.getString("item"))));
             ConfigurationSection waitingAcceptance = config.getConfigurationSection("waiting-acceptance");
             ConfigurationSection open = config.getConfigurationSection("open");
             ConfigurationSection disputed = config.getConfigurationSection("disputed");
@@ -114,10 +112,10 @@ public class ContractPortfolioViewer extends EditableInventory {
             Validate.notNull(open, "Could not load 'open' config");
             Validate.notNull(disputed, "Could not load 'disputed' config");
             Validate.notNull(ended, "Could not load 'ended' config");
-            waitingAcceptanceItem = new WaitingAcceptanceContractItem(this, waitingAcceptance,material);
-            openContractItem = new OpenContractItem(this, waitingAcceptance,material);
-            disputedContractItem = new DisputedContractItem(this, waitingAcceptance,material);
-            endedContractItem = new EndedContractItem(this, waitingAcceptance,material);
+            waitingAcceptanceItem = new WaitingAcceptanceContractItem(this, waitingAcceptance, material);
+            openContractItem = new OpenContractItem(this, waitingAcceptance, material);
+            disputedContractItem = new DisputedContractItem(this, waitingAcceptance, material);
+            endedContractItem = new EndedContractItem(this, waitingAcceptance, material);
         }
 
 
@@ -159,22 +157,21 @@ public class ContractPortfolioViewer extends EditableInventory {
         public Placeholders getPlaceholders(ContractPortfolioInventory inv, int n) {
             Contract contract = inv.displayedContracts.get(inv.page + n);
             Placeholders holders = new Placeholders();
-            holders.register("name",contract.getName());
-            holders.register("employee", contract.getEmployee()!=null?contract.getEmployeeName():"");
+            holders.register("name", contract.getName());
+            holders.register("employee", contract.getEmployee() != null ? contract.getEmployeeName() : "");
             holders.register("employer", contract.getEmployerName());
-            holders.register("payment-amount", contract.getPaymentInfo().getAmount());
-            holders.register("payment-type", ContractsUtils.chatName(contract.getPaymentInfo().getType().toString()));
-            holders.register("create-since", ContractsUtils.timeSinceInHours(contract.getCreationTime()) + " h");
-            holders.register("acceptance-since", contract.getAcceptanceTime()!=0?ContractsUtils.timeSinceInHours(contract.getAcceptanceTime()) + " h":"Not Accepted");
-            holders.register("end-since", contract.isEnded() ? ContractsUtils.timeSinceInHours(contract.getCreationTime()) + " h" : "Not Finished");
+            holders.register("payment-amount", contract.getAmount());
+            holders.register("created-since", ContractsUtils.timeSinceInHours(contract.getCreationTime()) + " h");
+            holders.register("accepted-since", contract.getAcceptanceTime() != 0 ? ContractsUtils.timeSinceInHours(contract.getAcceptanceTime()) + " h" : "Not Accepted");
+            holders.register("ended-since", contract.isEnded() ? ContractsUtils.timeSinceInHours(contract.getEndTime()) + " h" : "Not Finished");
             return holders;
         }
     }
 
     public class WaitingAcceptanceContractItem extends InventoryItem<ContractPortfolioInventory> {
 
-        public WaitingAcceptanceContractItem(ContractItem parent, ConfigurationSection config,Material material) {
-            super(parent, config,material);
+        public WaitingAcceptanceContractItem(ContractItem parent, ConfigurationSection config, Material material) {
+            super(parent, config, material);
         }
 
         @Override
@@ -185,8 +182,8 @@ public class ContractPortfolioViewer extends EditableInventory {
 
     public class OpenContractItem extends InventoryItem<ContractPortfolioInventory> {
 
-        public OpenContractItem(ContractItem parent, ConfigurationSection config,Material material) {
-            super(parent, config,material);
+        public OpenContractItem(ContractItem parent, ConfigurationSection config, Material material) {
+            super(parent, config, material);
         }
 
         @Override
@@ -196,8 +193,8 @@ public class ContractPortfolioViewer extends EditableInventory {
     }
 
     public class DisputedContractItem extends InventoryItem<ContractPortfolioInventory> {
-        public DisputedContractItem(ContractItem parent, ConfigurationSection config,Material material) {
-            super(parent, config,material);
+        public DisputedContractItem(ContractItem parent, ConfigurationSection config, Material material) {
+            super(parent, config, material);
         }
 
         @Override
@@ -208,8 +205,8 @@ public class ContractPortfolioViewer extends EditableInventory {
 
     public class EndedContractItem extends InventoryItem<ContractPortfolioInventory> {
 
-        public EndedContractItem(ContractItem parent, ConfigurationSection config,Material material) {
-            super(parent, config,material);
+        public EndedContractItem(ContractItem parent, ConfigurationSection config, Material material) {
+            super(parent, config, material);
         }
 
         @Override
@@ -274,12 +271,13 @@ public class ContractPortfolioViewer extends EditableInventory {
 
         public ContractPortfolioInventory(PlayerData playerData, EditableInventory editable) {
             super(playerData, editable);
+            Bukkit.broadcastMessage("NAME:"+getName());
         }
-
 
 
         public void changeState(ViewState viewState) {
             this.viewState = viewState;
+            otherViewStates = Arrays.stream(ViewState.values()).filter(viewState1 -> viewState1 != viewState).collect(Collectors.toList());
             displayedContracts = viewState.provide(playerData);
             maxPage = Math.max(0, displayedContracts.size() - 1) / contractsPerPage;
         }
@@ -291,21 +289,21 @@ public class ContractPortfolioViewer extends EditableInventory {
 
         @Override
         public void whenClicked(InventoryClickEvent event, InventoryItem item) {
-            if (item.getFunction().equals("next-page")) {
+            if (item instanceof NextPageItem) {
                 page++;
                 open();
             }
-            if (item.getFunction().equals("previous-page")) {
+            if (item instanceof PreviousPageItem) {
                 page--;
                 open();
             }
-            if (item.getFunction().equals("change-state")) {
+            if (item instanceof ChangeViewItem) {
                 ViewState newView = ViewState.valueOf(event.getCurrentItem().getItemMeta().getPersistentDataContainer().
                         get(new NamespacedKey(Contracts.plugin, "view-state"), PersistentDataType.STRING));
                 changeState(newView);
                 open();
             }
-            if (item.getFunction().equals("contract")) {
+            if (item instanceof ContractItem) {
                 if (viewState == ViewState.ENDED) {
                     //If there can be a review from the item (stored in a persistant data container)
                     if (event.getCurrentItem().getItemMeta().getPersistentDataContainer().get(new NamespacedKey(Contracts.plugin, "can-review"), PersistentDataType.INTEGER) == 1) {
@@ -313,7 +311,7 @@ public class ContractPortfolioViewer extends EditableInventory {
                         Contract contract = Contracts.plugin.contractManager.get(UUID.fromString(event.getCurrentItem().getItemMeta().getPersistentDataContainer().
                                 get(new NamespacedKey(Contracts.plugin, "contract"), PersistentDataType.STRING)));
                         UUID reviewer = playerData.getUuid();
-                        UUID reviewed = contract.getEmployee()!=null&&contract.getEmployee().equals(playerData.getUuid()) ? contract.getEmployer() : contract.getEmployee();
+                        UUID reviewed = contract.getEmployee() != null && contract.getEmployee().equals(playerData.getUuid()) ? contract.getEmployer() : contract.getEmployee();
                         int notation = Contracts.plugin.configManager.defaultNotation;
 
                         ContractReview review = new ContractReview(reviewed, reviewer, contract, notation, new ArrayList<>());
@@ -325,7 +323,7 @@ public class ContractPortfolioViewer extends EditableInventory {
 
                         //We close the gui and create the clickable chat message to set comment and notation
                         getPlayer().closeInventory();
-                        displayChoices(playerData,review);
+                        displayChoices(playerData, review);
                     }
                 }
             }
@@ -337,7 +335,6 @@ public class ContractPortfolioViewer extends EditableInventory {
             //nothing
         }
     }
-
 
 
     /**

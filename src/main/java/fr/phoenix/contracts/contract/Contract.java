@@ -1,16 +1,19 @@
-package fr.phoenix.contracts.contract;
+package fr.lezoo.contracts.contract;
 
-import fr.phoenix.contracts.Contracts;
-import fr.phoenix.contracts.event.ContractStateChangeEvent;
-import fr.phoenix.contracts.gui.objects.GeneratedInventory;
-import fr.phoenix.contracts.player.PlayerData;
-import fr.phoenix.contracts.utils.ChatInput;
-import fr.phoenix.contracts.utils.ContractsUtils;
-import fr.phoenix.contracts.utils.message.Message;
+import fr.lezoo.contracts.Contracts;
+import fr.lezoo.contracts.event.ContractStateChangeEvent;
+import fr.lezoo.contracts.gui.objects.GeneratedInventory;
+import fr.lezoo.contracts.player.PlayerData;
+import fr.lezoo.contracts.utils.ChatInput;
+import fr.lezoo.contracts.utils.ContractsUtils;
+import fr.lezoo.contracts.utils.message.Message;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.checkerframework.checker.units.qual.C;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -22,7 +25,7 @@ public abstract class Contract {
     protected final UUID employer;
     //Not final
     protected UUID employee;
-    protected PaymentInfo paymentInfo = new PaymentInfo();
+    protected double amount;
     protected ContractState state;
     private long creationTime, acceptanceTime, endTime;
 
@@ -45,18 +48,10 @@ public abstract class Contract {
         );
         addParameter("payment-amount", (p, str) -> {
             try {
-                paymentInfo.setAmount(Double.parseDouble(str));
+                setAmount(Double.parseDouble(str));
                 filledParameters.put("payment-amount", str);
             } catch (Exception e) {
                 Message.NOT_VALID_DOUBLE.format("input", str).send(p);
-            }
-        });
-        addParameter("payment-type", (p, str) -> {
-            try {
-                paymentInfo.setType(PaymentType.valueOf(ContractsUtils.enumName(str)));
-                filledParameters.put("payment-type", str);
-            } catch (Exception e) {
-                Message.NOT_VALID_PAYMENT_TYPE.format("input", str).send(p);
             }
         });
 
@@ -65,9 +60,9 @@ public abstract class Contract {
     public Contract(ConfigurationSection section) {
         name = section.getString("name");
         contractId = UUID.fromString(section.getName());
-        employee = section.getString("employee")==null?null:UUID.fromString(section.getString("employee"));
+        employee = section.getString("employee") == null ? null : UUID.fromString(section.getString("employee"));
         employer = UUID.fromString(section.getString("employer"));
-        paymentInfo = new PaymentInfo(Objects.requireNonNull(section.getConfigurationSection("payment-info")));
+        amount = section.getDouble("amount");
         state = ContractState.valueOf(ContractsUtils.enumName(section.getString("contract-state")));
         creationTime = section.getLong("creation-time");
         acceptanceTime = section.getLong("acceptance-time");
@@ -86,6 +81,8 @@ public abstract class Contract {
         parameters.put(str, consumer);
         parametersList.add(str);
     }
+
+
 
     public void openChatInput(String str, PlayerData playerData, GeneratedInventory inv) {
         //If the player is already on chat input we block the access to a new chat input.
@@ -140,8 +137,8 @@ public abstract class Contract {
         this.employee = employee;
     }
 
-    public void setPaymentInfo(PaymentInfo paymentInfo) {
-        this.paymentInfo = paymentInfo;
+    public void setAmount(double amount) {
+        this.amount = amount;
     }
 
     public UUID getUuid() {
@@ -192,16 +189,17 @@ public abstract class Contract {
     public void whenAccepted(UUID employeeId) {
         acceptanceTime = System.currentTimeMillis();
         employee = employeeId;
+        changeContractState(ContractState.OPEN);
         PlayerData.get(employeeId).addContract(this);
-        Message.CONTRACT_ACCEPTED.format("contract-name",getName()).send(PlayerData.get(employeeId).getPlayer());
+        Message.EMPLOYEE_CONTRACT_ACCEPTED.format("contract-name", getName()).send(PlayerData.get(employeeId).getPlayer());
     }
 
     public UUID getEmployee() {
         return employee;
     }
 
-    public PaymentInfo getPaymentInfo() {
-        return paymentInfo;
+    public double getAmount() {
+        return amount;
     }
 
     public void save(FileConfiguration config) {
@@ -211,8 +209,7 @@ public abstract class Contract {
         if (employee != null)
             config.set(str + ".employee", employee.toString());
         config.set(str + ".employer", employer.toString());
-        config.set(str + ".payment-info.type", ContractsUtils.ymlName(paymentInfo.getType().toString()));
-        config.set(str + ".payment-info.amount", "" + paymentInfo.getAmount());
+        config.set(str + "amount", "" + getAmount());
         config.set(str + ".contract-state", ContractsUtils.ymlName(state.toString()));
         config.set(str + ".creation-time", creationTime);
         config.set(str + ".acceptance-time", acceptanceTime);
@@ -234,6 +231,38 @@ public abstract class Contract {
         Bukkit.getPluginManager().callEvent(event);
         //We change the state of the contract and add it to contractsToReview
         state = newState;
+
+
+
+        //Do the processing with that change and send the messages to the players.
+        OfflinePlayer employeePlayer=employee==null?null:Bukkit.getOfflinePlayer(employee);
+        OfflinePlayer employerPlayer=employer==null?null:Bukkit.getOfflinePlayer(employer);
+        switch(newState) {
+            case FULFILLED:
+                if(employeePlayer!=null)
+                    Message.CONTRACT_FULFILLED.format("contract-name",name,"other",employerPlayer.getName())
+                            .send(employeePlayer.getPlayer());
+                if(employerPlayer!=null)
+                    Message.CONTRACT_FULFILLED.format("contract-name",name,"other",employeePlayer.getName())
+                            .send(employerPlayer.getPlayer());
+                //The employer is now in debt of the player
+                Contracts.plugin.debtManager.addDebt(employer,employee,amount);
+                break;
+
+            case DISPUTED:
+                if(employeePlayer!=null)
+                    Message.CONTRACT_DISPUTED.format("contract-name",name,"other",employerPlayer.getName())
+                            .send(employeePlayer.getPlayer());
+                if(employerPlayer!=null)
+                    Message.CONTRACT_DISPUTED.format("contract-name",name,"other",employeePlayer.getName())
+                            .send(employerPlayer.getPlayer());
+                break;
+            case OPEN:
+                if(employerPlayer!=null)
+                    Message.EMPLOYER_CONTRACT_ACCEPTED.format("contract-name",name,"player-name",employeePlayer.getName())
+                            .send(employerPlayer.getPlayer());
+                break;
+        }
 
 
     }

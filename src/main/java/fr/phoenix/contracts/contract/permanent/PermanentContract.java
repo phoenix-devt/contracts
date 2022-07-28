@@ -1,6 +1,6 @@
-package fr.phoenix.contracts.contract.permanent;
+package fr.lezoo.contracts.contract.permanent;
 
-import fr.phoenix.contracts.contract.Contract;
+import fr.lezoo.contracts.contract.Contract;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.UUID;

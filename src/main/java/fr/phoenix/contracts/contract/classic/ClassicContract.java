@@ -1,6 +1,6 @@
-package fr.phoenix.contracts.contract.classic;
+package fr.lezoo.contracts.contract.classic;
 
-import fr.phoenix.contracts.contract.Contract;
+import fr.lezoo.contracts.contract.Contract;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.Listener;
 

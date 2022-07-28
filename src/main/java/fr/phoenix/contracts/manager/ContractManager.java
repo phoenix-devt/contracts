@@ -25,6 +25,11 @@ public class ContractManager implements FileManager {
         return contracts.values().stream().filter(contract -> type.filter(contract)).collect(Collectors.toList());
     }
 
+    public List<Contract> getContractOfState(ContractState state) {
+
+        return contracts.values().stream().filter(contract ->contract.getState()==state).collect(Collectors.toList());
+    }
+
     public void addContract(Contract contract) {
         contracts.put(contract.getUuid(), contract);
     }

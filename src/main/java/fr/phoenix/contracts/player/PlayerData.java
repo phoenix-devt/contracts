@@ -20,6 +20,11 @@ public class PlayerData {
     //We want to keep the order in which contracts where inserted
     private final Map<UUID, Contract> contracts = new HashMap<>();
 
+    //It is used only for the middleman not for the others
+    private final Map<UUID,Contract> middlemanContracts= new HashMap<>();
+
+
+
     //All the reviews about this player
     private final Map<UUID, ContractReview> contractReviews = new LinkedHashMap<>();
     private int numberReviews;
@@ -78,6 +83,13 @@ public class PlayerData {
         }
 
 
+        //We load the middleman contracts
+        for (String key : config.getStringList("middleman-contracts")) {
+            Contract contract = Contracts.plugin.contractManager.get(UUID.fromString(key));
+            middlemanContracts.put(contract.getUuid(), contract);
+        }
+
+
         //We load the contracts reviews
         for (String key : config.getStringList("reviews")) {
             ContractReview review = Contracts.plugin.reviewManager.get(UUID.fromString(key));
@@ -98,6 +110,12 @@ public class PlayerData {
                 : contract1.getCreationTime() - contract2.getCreationTime())).collect(Collectors.toList());
     }
 
+    /**
+     * Gets all the contracts with the state matching the contractStates given in argument.
+     */
+    public List<Contract> getMiddlemanContracts(ContractState... states) {
+        return middlemanContracts.values().stream().filter(contract -> Arrays.asList(states).contains(contract.getState())).sorted((contract1, contract2) -> contract1.getCreationTime()).collect(Collectors.toList());
+    }
 
     public static boolean has(UUID uuid) {
         return Contracts.plugin.playerManager.has(uuid);
@@ -129,6 +147,9 @@ public class PlayerData {
         List<String> list = contracts.keySet().stream().map(UUID::toString).collect(Collectors.toList());
         config.set("contracts", list);
 
+        //Set the middleman contracts
+        List<String> middlemanList = contracts.keySet().stream().map(UUID::toString).collect(Collectors.toList());
+        config.set("contracts", middlemanList);
 
     }
 

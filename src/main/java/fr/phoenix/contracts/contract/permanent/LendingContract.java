@@ -1,9 +1,8 @@
-package fr.phoenix.contracts.contract.permanent;
+package fr.lezoo.contracts.contract.permanent;
 
-import fr.phoenix.contracts.Contracts;
-import fr.phoenix.contracts.contract.ContractState;
-import fr.phoenix.contracts.contract.PaymentType;
-import fr.phoenix.contracts.utils.message.Message;
+import fr.lezoo.contracts.Contracts;
+import fr.lezoo.contracts.contract.ContractState;
+import fr.lezoo.contracts.utils.message.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -30,13 +29,13 @@ public class LendingContract extends PermanentContract {
         numberRefunds = section.getInt("number-refunds");
         refundsMade = section.getInt("refunds-made");
         //Calculates the money that needs to be given per refund
-        moneyPerRefund = (paymentInfo.getAmount() * (1 + ((double) interestRate) / 100)) / numberRefunds;
+        moneyPerRefund = (getAmount() * (1 + ((double) interestRate) / 100)) / numberRefunds;
         startRunnable();
     }
 
     @Override
     public void createContract() {
-        moneyPerRefund = (paymentInfo.getAmount() * (1 + ((double) interestRate) / 100)) / numberRefunds;
+        moneyPerRefund = (getAmount() * (1 + ((double) interestRate) / 100)) / numberRefunds;
     }
 
 
@@ -78,16 +77,15 @@ public class LendingContract extends PermanentContract {
             public void run() {
 
                 //employer lender so it the employer who gives money to the employee
-                if (paymentInfo.getType() == PaymentType.MONEY) {
-                    if (Contracts.plugin.economy.getBalance(Bukkit.getOfflinePlayer(employer)) > moneyPerRefund) {
-                        Contracts.plugin.economy.withdrawPlayer(Bukkit.getOfflinePlayer(employer), moneyPerRefund);
-                        Contracts.plugin.economy.depositPlayer(Bukkit.getOfflinePlayer(employee), moneyPerRefund);
-                        refundsMade++;
-                    }
-                    //If the player can't refund than the contract is cancelled and a middle man will come
-                    else
-                        callDispute();
+                if (Contracts.plugin.economy.getBalance(Bukkit.getOfflinePlayer(employer)) > moneyPerRefund) {
+                    Contracts.plugin.economy.withdrawPlayer(Bukkit.getOfflinePlayer(employer), moneyPerRefund);
+                    Contracts.plugin.economy.depositPlayer(Bukkit.getOfflinePlayer(employee), moneyPerRefund);
+                    refundsMade++;
                 }
+                //If the player can't refund than the contract is cancelled and a middle man will come
+                else
+                    callDispute();
+
                 if (refundsMade >= numberRefunds) {
                     changeContractState(ContractState.FULFILLED);
                 }
