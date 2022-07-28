@@ -14,7 +14,6 @@ import fr.lezoo.contracts.player.PlayerData;
 import fr.lezoo.contracts.utils.ChatInput;
 import fr.lezoo.contracts.utils.ContractsUtils;
 import fr.lezoo.contracts.utils.message.Message;
-import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -22,23 +21,22 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 
-public class ContractMarketViewer extends EditableInventory {
-    public ContractMarketViewer() {
-        super("contract-market");
+public class ContractMiddlemanViewer extends EditableInventory {
+    public ContractMiddlemanViewer() {
+        super("contract-middleman");
     }
 
     @Override
@@ -49,22 +47,26 @@ public class ContractMarketViewer extends EditableInventory {
             return new NextPageItem(config);
         if (function.equals("previous-page"))
             return new PreviousPageItem(config);
-        if (function.equals("go-back"))
-            return new GoBackItem(config);
+        if (function.equals("switch"))
+            return new SwitchItem(config);
         if (function.equals("contract"))
             return new ContractItem(config);
 
         return null;
     }
 
+    /**
+     * @param ownContracts if it shows the contracts of the middle men or a list of all the different contracts
+     *                     waiting for a middle man.
+     * @return
+     */
+    public ContractMiddlemanInventory newInventory(PlayerData playerData, boolean ownContracts) {
 
-    public ContractMarketInventory newInventory(PlayerData playerData, ContractType contractType) {
-
-        return new ContractMarketInventory(playerData, this, contractType);
+        return new ContractMiddlemanInventory(playerData, this, ownContracts);
     }
 
 
-    public class ContractItem extends InventoryItem<ContractMarketInventory> {
+    public class ContractItem extends InventoryItem<ContractMiddlemanInventory> {
 
         public ContractItem(ConfigurationSection config) {
             super(config);
@@ -78,7 +80,7 @@ public class ContractMarketViewer extends EditableInventory {
 
 
         @Override
-        public ItemStack getDisplayedItem(ContractMarketInventory inv, int n) {
+        public ItemStack getDisplayedItem(ContractMiddlemanInventory inv, int n) {
             if (inv.page + n >= inv.displayedContracts.size())
                 return new ItemStack(Material.AIR);
             ItemStack item = super.getDisplayedItem(inv, n);
@@ -92,7 +94,7 @@ public class ContractMarketViewer extends EditableInventory {
 
 
         @Override
-        public Placeholders getPlaceholders(ContractMarketInventory inv, int n) {
+        public Placeholders getPlaceholders(ContractMiddlemanInventory inv, int n) {
             Contract contract = inv.displayedContracts.get(inv.page + n);
             Placeholders holders = new Placeholders();
             holders.register("name", contract.getName());
@@ -106,7 +108,7 @@ public class ContractMarketViewer extends EditableInventory {
     }
 
 
-    public class GoBackItem extends SimpleItem<ContractMarketInventory> {
+    public class GoBackItem extends SimpleItem<ContractMiddlemanInventory> {
 
         public GoBackItem(ConfigurationSection config) {
             super(config);
@@ -114,44 +116,43 @@ public class ContractMarketViewer extends EditableInventory {
     }
 
 
-    public class PreviousPageItem extends SimpleItem<ContractMarketInventory> {
+    public class PreviousPageItem extends SimpleItem<ContractMiddlemanInventory> {
 
         public PreviousPageItem(ConfigurationSection config) {
             super(config);
         }
 
         @Override
-        public boolean isDisplayed(ContractMarketInventory inv) {
+        public boolean isDisplayed(ContractMiddlemanInventory inv) {
             return inv.page > 0;
         }
 
     }
 
-    public class NextPageItem extends SimpleItem<ContractMarketInventory> {
+    public class NextPageItem extends SimpleItem<ContractMiddlemanInventory> {
 
         public NextPageItem(ConfigurationSection config) {
             super(config);
         }
 
         @Override
-        public boolean isDisplayed(ContractMarketInventory inv) {
+        public boolean isDisplayed(ContractMiddlemanInventory inv) {
             return inv.page < inv.maxPage;
         }
     }
 
 
-    public class ContractMarketInventory extends GeneratedInventory {
-        private ContractType contractType;
+    public class ContractMiddlemanInventory extends GeneratedInventory {
+        private boolean ownContracts;
         private int page = 0;
         private final int contractsPerPage;
-        //TODO Sort the contract by pertinence
         private final List<Contract> displayedContracts;
         private int maxPage;
 
-        public ContractMarketInventory(PlayerData playerData, EditableInventory editable, ContractType contractType) {
+        public ContractMiddlemanInventory(PlayerData playerData, EditableInventory editable, MiddleManContractType ownContracts) {
             super(playerData, editable);
-            this.contractType = contractType;
-            displayedContracts = Contracts.plugin.contractManager.getContractOfType(contractType).stream()
+            this.ownContracts = ownContracts;
+            displayedContracts = Contracts.plugin.contractManager.getContractOfState(C).stream()
                     .filter(contract -> contract.getState() == ContractState.WAITING_ACCEPTANCE)
                     .sorted((contract1, contract2) -> (int) (contract1.getCreationTime() - contract2.getCreationTime())).collect(Collectors.toList());
             contractsPerPage = getEditable().getByFunction("contract").getSlots().size();
@@ -215,6 +216,30 @@ public class ContractMarketViewer extends EditableInventory {
         @Override
         public void whenClosed(InventoryCloseEvent event) {
 
+        }
+    }
+
+
+    public enum MiddlemanContractType {
+        //Contract with is a dispute but with no middle man engaged
+        WAITING_MIDDLEMAN_CONTRACT(playerData -> Contracts.plugin.contractManager.getContractOfState(ContractState.WAITING_MIDDLEMAN)
+                .stream().sorted((contract1, contract2) -> (int) (contract1.getCreationTime() - contract2.getCreationTime())).collect(Collectors.toList()))
+        ,
+        //The contracts of a middle man
+        OWN_CONTRACT(playerData -> playerData.)
+        //The admin disputed contracts of a middle man
+        ,OWN_ADMIN_DISPUTED_CONTRACT;
+
+
+        private final Function<PlayerData, List<Contract>> contractProvider;
+
+        //enum constructor must be private
+        MiddlemanContractType(Function<PlayerData, List<Contract>> contractProvider) {
+            this.contractProvider = contractProvider;
+        }
+
+        public List<Contract> provideContracts(PlayerData playerData) {
+            return contractProvider.apply(playerData);
         }
     }
 }

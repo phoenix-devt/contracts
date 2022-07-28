@@ -27,12 +27,12 @@ items:
       name: '&eContract: {name}'
       lore:
         - '&eAwaiting for an acceptance.'
-        - '&ePosted {start-since} ago.'
+        - '&ePosted {created-since} ago.'
     open:
       name: '&eContract: {name}'
       lore:
         - '&eContract creator: {employer}'
-        - '&eAccepted by &6{employee} &e{acceptance-since} ago'
+        - '&eAccepted by &6{employee} &e{accepted-since} ago'
     disputed:
       name: '&eContract: {name}'
       lore:
@@ -40,5 +40,5 @@ items:
     ended:
       name: '&eContract: {name}'
       lore:
-        - 'This contract ended {end-since} ago.'
+        - 'This contract ended {ended-since} ago.'
         - 'Can review: {can-review}'

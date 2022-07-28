@@ -30,6 +30,8 @@ public class Contracts extends JavaPlugin {
     public final ReviewManager reviewManager = new ReviewManager();
     public final PlaceholderParser placeholderParser = new DefaultPlaceholderParser();
 
+    public final DebtManager debtManager = new DebtManager();
+
     @Override
     public void onEnable() {
         // Metrics data
@@ -48,13 +50,11 @@ public class Contracts extends JavaPlugin {
         }
 
         //Register listeners
-        getServer().getPluginManager().registerEvents(new PlayerListener(),this);
-
-
+        getServer().getPluginManager().registerEvents(new PlayerListener(), this);
 
 
         //We register the root command
-        getCommand("contract").setExecutor(new ContractTreeRoot("contract",""));
+        getCommand("contract").setExecutor(new ContractTreeRoot("contract", ""));
 
         //Save the commands
         try {
