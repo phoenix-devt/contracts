@@ -9,7 +9,6 @@ import fr.phoenix.contracts.utils.ContractsUtils;
 import fr.phoenix.contracts.utils.message.Message;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -254,16 +253,8 @@ public abstract class Contract {
         Contracts.plugin.economy.depositPlayer(Bukkit.getOfflinePlayer(this.employee), amount);
     }
 
-
     public void changeContractState(ContractState newState) {
-        ContractStateChangeEvent event = new ContractStateChangeEvent(this, newState);
-        Bukkit.getPluginManager().callEvent(event);
-        //We change the state of the contract and add it to contractsToReview
+        Bukkit.getPluginManager().callEvent(new ContractStateChangeEvent(this, newState));
         state = newState;
-
-        //Do the processing with that change and send the messages to the players.
-        OfflinePlayer employeePlayer = employee == null ? null : Bukkit.getOfflinePlayer(employee);
-        OfflinePlayer employerPlayer = employer == null ? null : Bukkit.getOfflinePlayer(employer);
-
     }
 }

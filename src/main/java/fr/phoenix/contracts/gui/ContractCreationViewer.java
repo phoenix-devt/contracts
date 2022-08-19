@@ -42,8 +42,6 @@ public class ContractCreationViewer extends EditableInventory {
     }
 
     public ContractCreationInventory newInventory(PlayerData playerData, ContractType contractType) {
-
-
         return new ContractCreationInventory(playerData, this, contractType);
     }
 

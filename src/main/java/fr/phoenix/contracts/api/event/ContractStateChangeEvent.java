@@ -15,6 +15,10 @@ public class ContractStateChangeEvent extends Event {
         this.newState = newState;
     }
 
+    public ContractState getOldState() {
+        return contract.getState();
+    }
+
     public ContractState getNewState() {
         return newState;
     }
