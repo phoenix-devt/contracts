@@ -28,6 +28,7 @@ public class Contracts extends JavaPlugin {
     public final ContractManager contractManager = new ContractManager();
     public final ReviewManager reviewManager = new ReviewManager();
     public final PlaceholderParser placeholderParser = new DefaultPlaceholderParser();
+    public final MiddlemenManager middlemenManager = new MiddlemenManager();
 
     @Override
     public void onEnable() {
@@ -91,4 +92,9 @@ public class Contracts extends JavaPlugin {
     public static void log(Level level, String message) {
         plugin.getLogger().log(level, message);
     }
+
+    public static void log(String message) {
+        plugin.getLogger().log(Level.WARNING, message);
+    }
+
 }

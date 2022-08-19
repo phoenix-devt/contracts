@@ -1,11 +1,12 @@
 package fr.phoenix.contracts.player;
 
 import fr.phoenix.contracts.Contracts;
-import fr.phoenix.contracts.contract.debt.DebtInfo;
+import fr.phoenix.contracts.manager.MiddlemenManager;
 import fr.phoenix.contracts.utils.ConfigFile;
 import fr.phoenix.contracts.contract.Contract;
 import fr.phoenix.contracts.contract.ContractState;
 import fr.phoenix.contracts.contract.review.ContractReview;
+import fr.phoenix.contracts.utils.message.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -23,6 +24,9 @@ public class PlayerData {
      * Keep the order in which contracts where inserted
      */
     private final Map<UUID, Contract> contracts = new LinkedHashMap<>();
+
+
+    private boolean isMiddleman;
 
     /**
      * Used only for the middleman, not for the others
@@ -66,7 +70,7 @@ public class PlayerData {
     }
 
     public boolean canLeaveReview(Contract contract) {
-        return (contract.isEnded() && (System.currentTimeMillis() - contract.getEndTime()) < Contracts.plugin.configManager.reviewPeriod);
+        return (contract.hasBeenIn(ContractState.RESOLVED) && (System.currentTimeMillis() - contract.getEnteringTime(ContractState.RESOLVED)) < Contracts.plugin.configManager.reviewPeriod);
     }
 
     public void addContract(Contract contract) {
@@ -80,10 +84,18 @@ public class PlayerData {
         meanNotation = ((double) (totalNotation + review.getNotation())) / ((double) numberReviews);
     }
 
+    /**
+     * When a middleman is assigned a contract.
+     */
+    public void assignMiddlemanContract(Contract contract) {
+        Message.ASSIGNED_MIDDLEMAN_CONTRACT.format().send(player);
+        middlemanContracts.put(contract.getId(),contract);
+    }
+
 
     public void loadFromConfig() {
         FileConfiguration config = new ConfigFile("/userdata", uuid.toString()).getConfig();
-
+        isMiddleman=config.getBoolean("is-middlemen");
 
         //We load the contracts
         for (String key : config.getStringList("contracts")) {
@@ -106,6 +118,38 @@ public class PlayerData {
         }
     }
 
+    /**
+     * @return The number of middle man contracts that are not resolved.
+     */
+    public int getNumberOpenedMiddlemanContracts() {
+        return middlemanContracts.values().stream().filter(contract -> contract.getState()!=ContractState.RESOLVED).toList().size();
+    }
+
+    public boolean isMiddleman() {
+        return isMiddleman;
+    }
+
+    public void setMiddleman(boolean isMiddleman) {
+        this.isMiddleman=isMiddleman;
+    }
+
+    public Map<UUID, Contract> getMiddlemanContracts() {
+        return middlemanContracts;
+    }
+
+
+    /**
+     * Gets all the middleman contracts with the state matching the contractStates given in argument.
+     */
+    public List<Contract> getMiddlemanContracts(ContractState... states) {
+        return middlemanContracts.values()
+                .stream()
+                .filter(contract -> Arrays.asList(states).contains(contract.getState()))
+                .sorted((contract1, contract2) -> (int)(contract1.getLastStateChange()-contract2.getLastStateChange()))
+                .collect(Collectors.toList());
+    }
+
+
     public List<ContractReview> getReviews() {
         return contractReviews.values().stream().sorted((review1, review2) -> (int) (review1.getReviewDate() - review2.getReviewDate())).collect(Collectors.toList());
     }
@@ -114,8 +158,11 @@ public class PlayerData {
      * Gets all the contracts with the state matching the contractStates given in argument.
      */
     public List<Contract> getContracts(ContractState... states) {
-        return contracts.values().stream().filter(contract -> Arrays.asList(states).contains(contract.getState())).sorted((contract1, contract2) -> (int) (contract1.isEnded() ? contract1.getEndTime() - contract2.getEndTime()
-                : contract1.getCreationTime() - contract2.getCreationTime())).collect(Collectors.toList());
+        return contracts.values()
+                .stream()
+                .filter(contract -> Arrays.asList(states).contains(contract.getState()))
+                .sorted((contract1, contract2) -> (int)(contract1.getLastStateChange()-contract2.getLastStateChange()))
+                .collect(Collectors.toList());
     }
 
     public static boolean has(UUID uuid) {

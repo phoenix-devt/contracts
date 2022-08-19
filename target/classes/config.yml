@@ -9,7 +9,5 @@ review-period: 5
 max-comment-lines: 4
 max-comment-char-per-line: 20
 
-max-contract-per-middleman: 5
-
 #The default notation on a review if you don't change it. (from 1 to 5)
 default-notation: 3

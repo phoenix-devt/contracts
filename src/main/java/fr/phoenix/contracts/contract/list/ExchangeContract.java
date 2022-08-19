@@ -28,16 +28,20 @@ public class ExchangeContract extends Contract implements Listener {
         addParameter("material", (player, str) -> {
             try {
                 this.material = Material.valueOf(ContractsUtils.enumName(str));
+                return true;
             } catch (IllegalArgumentException exception) {
                 Message.NOT_VALID_MATERIAL.format("input", ContractsUtils.enumName(str)).send(player);
+                return false;
             }
         });
 
         addParameter("material-amount", (player, str) -> {
             try {
                 materialAmount = Double.parseDouble(str);
+                return true;
             } catch (Exception e) {
                 Message.NOT_VALID_DOUBLE.format("input", str).send(player);
+                return false;
             }
         });
     }

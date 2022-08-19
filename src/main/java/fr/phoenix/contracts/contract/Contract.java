@@ -13,11 +13,9 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 public abstract class Contract {
     protected final UUID contractId;
@@ -28,14 +26,26 @@ public abstract class Contract {
     // Not final
     protected UUID employee;
     protected double amount;
+    /**
+     * The amount of money you can lose/gain when a dispute is resolved.
+     */
+    protected double guarantee;
+
     protected ContractState state;
-    private long creationTime, acceptanceTime, endTime;
+    private Map<ContractState, Long> stateEnteringTime = new HashMap<>();
+    private long lastStateChange;
 
     // Hashmap to store all the parameters that need to be setup and to check if it has been setup
     protected final List<String> parametersList = new ArrayList<>();
-    private final HashMap<String, BiConsumer<Player, String>> parameters = new HashMap<>();
+    /**
+     * Maps the parameter names to the function that will be applied when a player tries to set them.
+     * If the function return true, The parameter will be effectively modified.
+     */
+    private final HashMap<String, BiFunction<Player, String, Boolean>> parameters = new HashMap<>();
 
-    // Map all the filledParameters with their value
+    /**
+     * Maps all the filledParameters with their value.
+     */
     protected final HashMap<String, String> filledParameters = new HashMap<>();
 
     public Contract(ContractType type, UUID employer) {
@@ -43,21 +53,31 @@ public abstract class Contract {
         this.type = type;
         this.employer = employer;
         state = ContractState.OPEN;
-        creationTime = System.currentTimeMillis();
-
+        stateEnteringTime.put(ContractState.WAITING_ACCEPTANCE, System.currentTimeMillis());
+        lastStateChange = System.currentTimeMillis();
         addParameter("name", (p, str) -> {
                     name = str;
-                    filledParameters.put("name", str);
+                    return true;
                 }
         );
-
+        addParameter("guarantee", (p, str) -> {
+                    try {
+                        amount = Double.parseDouble(str);
+                    } catch (Exception e) {
+                        Message.NOT_VALID_DOUBLE.format("input", str).send(p);
+                        return false;
+                    }
+                    return true;
+                }
+        );
         addParameter("payment-amount", (p, str) -> {
             try {
                 setAmount(Double.parseDouble(str));
-                filledParameters.put("payment-amount", str);
             } catch (Exception e) {
                 Message.NOT_VALID_DOUBLE.format("input", str).send(p);
+                return false;
             }
+            return true;
         });
 
     }
@@ -70,9 +90,11 @@ public abstract class Contract {
         employer = UUID.fromString(section.getString("employer"));
         amount = section.getDouble("amount");
         state = ContractState.valueOf(ContractsUtils.enumName(section.getString("contract-state")));
-        creationTime = section.getLong("creation-time");
-        acceptanceTime = section.getLong("acceptance-time");
-        endTime = section.contains("end-time") ? section.getLong("end-time") : 0;
+        if (section.contains("entering-time")) {
+            for (String key : section.getConfigurationSection("entering-time").getKeys(false)) {
+                stateEnteringTime.put(ContractState.valueOf(ContractsUtils.enumName(key)), section.getLong("entering-time." + key));
+            }
+        }
     }
 
     public List<String> getParametersList() {
@@ -83,7 +105,7 @@ public abstract class Contract {
      * This method is very important, it is used to have an
      * ordered list representing the parameters for the gui.
      */
-    protected void addParameter(String str, BiConsumer<Player, String> consumer) {
+    protected void addParameter(String str, BiFunction<Player, String, Boolean> consumer) {
         parameters.put(str, consumer);
         parametersList.add(str);
     }
@@ -96,7 +118,8 @@ public abstract class Contract {
         }
         Message.SET_PARAMETER_ASK.format("parameter-name", ContractsUtils.chatName(str)).send(playerData.getPlayer());
         new ChatInput(playerData, inv, (p, val) -> {
-            parameters.get(str).accept(p.getPlayer(), val);
+            if (parameters.get(str).apply(p.getPlayer(), val))
+                filledParameters.put(str, val);
             return true;
         });
     }
@@ -145,6 +168,14 @@ public abstract class Contract {
         this.amount = amount;
     }
 
+    public double getGuarantee() {
+        return guarantee;
+    }
+
+    public void setGuarantee(double guarantee) {
+        this.guarantee = guarantee;
+    }
+
     public UUID getId() {
         return contractId;
     }
@@ -153,20 +184,19 @@ public abstract class Contract {
         return state;
     }
 
-    public boolean isEnded() {
-        return endTime > 0;
+    /**
+     * If the entering time is set then the contract has been in the state.
+     */
+    public boolean hasBeenIn(ContractState state) {
+        return stateEnteringTime.containsKey(state);
     }
 
-    public long getCreationTime() {
-        return creationTime;
+    public long getEnteringTime(ContractState state) {
+        return stateEnteringTime.get(state);
     }
 
-    public long getAcceptanceTime() {
-        return acceptanceTime;
-    }
-
-    public long getEndTime() {
-        return endTime;
+    public long getLastStateChange() {
+        return lastStateChange;
     }
 
     public String getName() {
@@ -188,14 +218,13 @@ public abstract class Contract {
     /**
      * Method called when a player approves and accepts a contract.
      */
-    public void whenAccepted(UUID employeeId) {
-        Validate.isTrue(state == ContractState.OPEN, "Contract is not open");
+    public void whenAccepted(PlayerData playerData) {
+        Validate.isTrue(state == ContractState.WAITING_ACCEPTANCE, "Contract is not waiting acceptance.");
 
-        acceptanceTime = System.currentTimeMillis();
-        employee = employeeId;
+        employee = playerData.getUuid();
         changeContractState(ContractState.OPEN);
-        PlayerData.get(employeeId).addContract(this);
-        Message.EMPLOYEE_CONTRACT_ACCEPTED.format("contract-name", getName()).send(PlayerData.get(employeeId).getPlayer());
+        playerData.addContract(this);
+        Message.EMPLOYEE_CONTRACT_ACCEPTED.format("contract-name", getName()).send(playerData.getPlayer());
     }
 
     public UUID getEmployee() {
@@ -215,25 +244,25 @@ public abstract class Contract {
         config.set(str + ".employer", employer.toString());
         config.set(str + "amount", "" + getAmount());
         config.set(str + ".contract-state", ContractsUtils.ymlName(state.toString()));
-        config.set(str + ".creation-time", creationTime);
-        config.set(str + ".acceptance-time", acceptanceTime);
-        config.set(str + ".end-time", endTime);
+        for (ContractState state : stateEnteringTime.keySet()) {
+            config.set(str + ".entering-time." + ContractsUtils.ymlName(state.toString()), stateEnteringTime.get(state));
+        }
     }
 
     /**
      * Calls a middle man because there is a dispute with the contract.
      */
     public void callDispute() {
-        //TODO
-
-        /*
-                   if (employeePlayer != null)
-                    Message.CONTRACT_DISPUTED.format("contract-name", name, "other", employerPlayer.getName())
-                            .send(employeePlayer.getPlayer());
-                if (employerPlayer != null)
-                    Message.CONTRACT_DISPUTED.format("contract-name", name, "other", employeePlayer.getName())
-                            .send(employerPlayer.getPlayer());
-         */
+        changeContractState(ContractState.MIDDLEMAN_DISPUTED);
+        Player employeePlayer = Bukkit.getPlayer(employee);
+        Player employerPlayer = Bukkit.getPlayer(employer);
+        if (employeePlayer != null)
+            Message.CONTRACT_DISPUTED.format("contract-name", name, "other", employerPlayer.getName())
+                    .send(employeePlayer.getPlayer());
+        if (employerPlayer != null)
+            Message.CONTRACT_DISPUTED.format("contract-name", name, "other", employeePlayer.getName())
+                    .send(employerPlayer.getPlayer());
+        Contracts.plugin.middlemenManager.assignToRandomMiddleman(this);
     }
 
     /**
@@ -256,5 +285,8 @@ public abstract class Contract {
     public void changeContractState(ContractState newState) {
         Bukkit.getPluginManager().callEvent(new ContractStateChangeEvent(this, newState));
         state = newState;
+        lastStateChange = System.currentTimeMillis();
+        stateEnteringTime.put(newState, System.currentTimeMillis());
     }
+
 }

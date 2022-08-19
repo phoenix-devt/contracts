@@ -20,16 +20,14 @@ public enum ContractState {
     FULFILLED,
 
     /**
-     * Employee/employer has opened a dispute and is
-     * waiting for a middleman to review his case
-     */
-    WAITING_MIDDLEMAN,
-
-    /**
      * A middleman is reviewing his case
      */
     MIDDLEMAN_DISPUTED,
 
+    /**
+     * A middle man has given his decision but an appeal to admins can be made.
+     */
+    MIDDLEMAN_RESOLVED,
     /**
      *
      */

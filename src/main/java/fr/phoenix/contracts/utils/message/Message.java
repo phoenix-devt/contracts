@@ -13,7 +13,7 @@ public enum Message {
 
     CANT_ACCEPT_OWN_CONTRACT("&cYou can't accept your own contract!"),
     CONTRACT_REFUSED("&cYou refused the contract &6{contract-name}&c."),
-
+    ASSIGNED_MIDDLEMAN_CONTRACT("&aA brand new middleman contract as been assigned to you!"),
     EMPLOYER_CONTRACT_ACCEPTED("&aCongratulations your contract &6{contract-name} was just accepted by &6{player-name}&a."),
 
     EMPLOYEE_CONTRACT_ACCEPTED("&aCongratulations you accepted the contract &6{contract-name}&a."),

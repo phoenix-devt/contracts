@@ -1,0 +1,30 @@
+# GUI display name
+name: "&6{type}'s &eType "
+
+# Number of slots in your inventory. Must be
+# between 9 and 54 and must be a multiple of 9.
+slots: 9
+
+items:
+  lending:
+    function: 'lending'
+    slots: [ 8 ]
+    name: '&6Lending Contracts'
+    item: WHITE_CONCRETE
+  salary:
+    function: 'salary'
+    name: '&6Salary Contracts'
+    slots: [ 7 ]
+    item: BLACK_CONCRETE
+
+  kill:
+    function: 'kill'
+    name: '&6Kill Contracts'
+    slots: [ 0 ]
+    item: RED_CONCRETE
+
+  exchange:
+    function: 'exchange'
+    name: '&6Exchange Contracts'
+    slots: [ 1 ]
+    item: BLUE_CONCRETE

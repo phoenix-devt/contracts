@@ -32,9 +32,10 @@ public class KillContract extends Contract implements Listener {
         addParameter("player-to-kill", (p, str) -> {
                     if (Contracts.plugin.playerManager.has(str)) {
                         playerToKill = Contracts.plugin.playerManager.get(str);
-                        filledParameters.put("player-to-kill", str);
-                    } else
-                        Message.NOT_VALID_PLAYER.format("input", str).send(p);
+                        return true;
+                    }
+                    Message.NOT_VALID_PLAYER.format("input", str).send(p);
+                    return false;
                 }
         );
     }

@@ -11,10 +11,8 @@ import fr.phoenix.contracts.gui.objects.item.Placeholders;
 import fr.phoenix.contracts.gui.objects.item.SimpleItem;
 import fr.phoenix.contracts.manager.InventoryManager;
 import fr.phoenix.contracts.player.PlayerData;
-import fr.phoenix.contracts.utils.ChatInput;
 import fr.phoenix.contracts.utils.ContractsUtils;
 import fr.phoenix.contracts.utils.message.Message;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
@@ -91,7 +89,7 @@ public class ContractMarketViewer extends EditableInventory {
             holders.register("name", contract.getName());
             holders.register("employer", contract.getEmployerName());
             holders.register("payment-amount", contract.getAmount());
-            holders.register("created-since", ContractsUtils.timeSinceInHours(contract.getCreationTime()) + " h");
+            holders.register("created-since", ContractsUtils.formatTime(contract.getEnteringTime(ContractState.WAITING_ACCEPTANCE)));
 
             //TODO: Un item par type de contrat
             return holders;
@@ -146,7 +144,7 @@ public class ContractMarketViewer extends EditableInventory {
             this.contractType = contractType;
             displayedContracts = Contracts.plugin.contractManager.getContractsOfType(contractType).stream()
                     .filter(contract -> contract.getState() == ContractState.WAITING_ACCEPTANCE)
-                    .sorted((contract1, contract2) -> (int) (contract1.getCreationTime() - contract2.getCreationTime())).collect(Collectors.toList());
+                    .sorted((contract1, contract2) -> (int) (contract1.getEnteringTime(ContractState.WAITING_ACCEPTANCE) - contract2.getEnteringTime(ContractState.WAITING_ACCEPTANCE))).collect(Collectors.toList());
             contractsPerPage = getEditable().getByFunction("contract").getSlots().size();
 
             maxPage = Math.max(0, displayedContracts.size() - 1) / contractsPerPage;
@@ -184,21 +182,7 @@ public class ContractMarketViewer extends EditableInventory {
                         return;
                     }
 
-
-                    player.getOpenInventory().close();
-                    //We accept the contract after a chat input is displayed
-                    Message.ARE_YOU_SURE_TO_ACCEPT.format("contract-name", contract.getName()).send(player);
-                    new ChatInput(playerData, (playerData, str) -> {
-                        if (str.replace(" ", "").equalsIgnoreCase("yes")) {
-                            //We must run sync
-                            Bukkit.getScheduler().scheduleSyncDelayedTask(Contracts.plugin, () -> {
-                                contract.whenAccepted(playerData.getUuid());
-                            });
-
-                        } else
-                            Message.CONTRACT_REFUSED.format("contract-name", contract.getName()).send(player);
-                        return true;
-                    });
+                    InventoryManager.CONTRACT_ACCEPT_CONFIRMATION.generate(this,contract).open();
 
                 }
             }

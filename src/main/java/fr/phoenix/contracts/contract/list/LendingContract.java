@@ -47,22 +47,28 @@ public class LendingContract extends Contract {
         addParameter("interest-period", (p, str) -> {
             try {
                 interestPeriod = Integer.parseInt(str);
+                return true;
             } catch (Exception e) {
                 Message.NOT_VALID_INTEGER.format("input", str).send(p);
+                return false;
             }
         });
         addParameter("interest-rate", (p, str) -> {
             try {
                 interestRate = Integer.parseInt(str);
+                return true;
             } catch (Exception e) {
                 Message.NOT_VALID_INTEGER.format("input", str).send(p);
+                return false;
             }
         });
         addParameter("number-refunds", (p, str) -> {
             try {
                 numberRefunds = Integer.parseInt(str);
+                return true;
             } catch (Exception e) {
                 Message.NOT_VALID_INTEGER.format("input", str).send(p);
+                return false;
             }
         });
 

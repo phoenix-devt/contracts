@@ -8,7 +8,7 @@ import java.nio.file.Files;
 
 public class ConfigManager implements FileManager {
     public long reviewPeriod;
-    public int maxCommentCharPerLine, maxCommentLines, defaultNotation;
+    public int maxCommentCharPerLine, maxCommentLines, defaultNotation, maxContractsPerMiddleman;
     public char colorCodeChar;
 
 
@@ -19,7 +19,7 @@ public class ConfigManager implements FileManager {
         maxCommentCharPerLine = Contracts.plugin.getConfig().getInt("max-comment-char-per-line");
         defaultNotation = Contracts.plugin.getConfig().getInt("default-notation");
         colorCodeChar = Contracts.plugin.getConfig().getString("color-code-char").charAt(0);
-
+        maxContractsPerMiddleman = Contracts.plugin.getConfig().getInt("max-contract-per-middleman");
 
         // Load default files
         loadDefaultFile("commands.yml");

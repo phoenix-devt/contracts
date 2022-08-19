@@ -1,0 +1,27 @@
+name: '&Market for &6{type} &eContracts.'
+slots: 27
+
+items:
+  go-back:
+    name: '&cGo Back'
+    function: 'go-back'
+    item: OAK_SIGN
+
+  next-page:
+    function: 'next-page'
+    name: '&Next Page'
+    item: ARROW
+
+  previous-page:
+    function: 'previous-page'
+    name: '&cPrevious Page'
+    item: ARROW
+
+  contract:
+    function: 'contract'
+    item: BOOK
+    name: '&eContract: {name}'
+    lore:
+        - '&eAwaiting for an acceptance.'
+        - '&ePosted {start-since} ago.'
+
