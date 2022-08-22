@@ -29,7 +29,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -134,7 +133,7 @@ public class ContractMiddlemanViewer extends EditableInventory {
         @Override
         public Placeholders getPlaceholders(ContractMiddlemanInventory inv, int n) {
             Contract contract = inv.displayedContracts.get(inv.page + n);
-            return ContractsUtils.getContractPlaceholder(contract);
+            return contract.getContractPlaceholder(inv.getPlayerData());
         }
     }
 
@@ -221,35 +220,13 @@ public class ContractMiddlemanViewer extends EditableInventory {
                 changeState(newView);
                 open();
             }
+            //TODO
             if (item instanceof ContractItem) {
                 Contract contract = Contracts.plugin.contractManager.get(UUID.fromString(Objects.requireNonNull(event.getCurrentItem().getItemMeta().getPersistentDataContainer()
                         .get(new NamespacedKey(Contracts.plugin, "contract"), PersistentDataType.STRING))));
                 //If left click, shows the reputation of the player
                 if (event.getAction().equals(InventoryAction.PICKUP_HALF)) {
-                    InventoryManager.REPUTATION.newInventory(playerData, PlayerData.get(contract.getEmployer()), this).open();
-                }
-                if (event.getAction().equals(InventoryAction.PICKUP_ALL)) {
-                    if (playerData.getUuid().equals(contract.getEmployer())) {
-                        Message.CANT_ACCEPT_OWN_CONTRACT.format().send(player);
-                        return;
-                    }
-
-
-                    player.getOpenInventory().close();
-                    //We accept the contract after a chat input is displayed
-                    Message.ARE_YOU_SURE_TO_ACCEPT.format("contract-name", contract.getName()).send(player);
-                    new ChatInput(playerData, (playerData, str) -> {
-                        if (str.replace(" ", "").equalsIgnoreCase("yes")) {
-                            //We must run sync
-                            Bukkit.getScheduler().scheduleSyncDelayedTask(Contracts.plugin, () -> {
-                                contract.whenAccepted(playerData);
-                            });
-
-                        } else
-                            Message.CONTRACT_REFUSED.format("contract-name", contract.getName()).send(player);
-                        return true;
-                    });
-
+                    InventoryManager.REPUTATION.newInventory(playerData, PlayerData.getOrLoad(contract.getEmployer()), this).open();
                 }
             }
 

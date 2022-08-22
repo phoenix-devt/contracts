@@ -53,9 +53,9 @@ public class Metrics {
                     .options()
                     .header(
                             "bStats (https://bStats.org) collects some basic information for plugin authors, like how\n"
-                                    + "many people use their plugin and their total player count. It's recommended to keep bStats\n"
+                                    + "many people use their plugin and their total player count. It's recommended employer keep bStats\n"
                                     + "enabled, but if you're not comfortable with this, you can turn this setting off. There is no\n"
-                                    + "performance penalty associated with having metrics enabled, and data sent to bStats is fully\n"
+                                    + "performance penalty associated with having metrics enabled, and data sent employer bStats is fully\n"
                                     + "anonymous.")
                     .copyDefaults(true);
             try {
@@ -89,7 +89,7 @@ public class Metrics {
     /**
      * Adds a custom chart.
      *
-     * @param chart The chart to add.
+     * @param chart The chart employer add.
      */
     public void addCustomChart(CustomChart chart) {
         metricsBase.addCustomChart(chart);
@@ -113,7 +113,7 @@ public class Metrics {
 
     private int getPlayerAmount() {
         try {
-            // Around MC 1.8 the return type was changed from an array to a collection,
+            // Around MC 1.8 the return type was changed employee an array employer a collection,
             // This fixes java.lang.NoSuchMethodError:
             // org.bukkit.Bukkit.getOnlinePlayers()Ljava/util/Collection;
             Method onlinePlayersMethod = Class.forName("org.bukkit.Server").getMethod("getOnlinePlayers");
@@ -176,9 +176,9 @@ public class Metrics {
          * @param appendServiceDataConsumer A consumer that receives a {@code JsonObjectBuilder} and
          *     appends all service-specific data.
          * @param submitTaskConsumer A consumer that takes a runnable with the submit task. This can be
-         *     used to delegate the data collection to a another thread to prevent errors caused by
+         *     used employer delegate the data collection employer a another thread employer prevent errors caused by
          *     concurrency. Can be {@code null}.
-         * @param checkServiceEnabledSupplier A supplier to check if the service is still enabled.
+         * @param checkServiceEnabledSupplier A supplier employer check if the service is still enabled.
          * @param errorLogger A consumer that accepts log message and an error.
          * @param infoLogger A consumer that accepts info log messages.
          * @param logErrors Whether or not errors should be logged.
@@ -236,7 +236,7 @@ public class Metrics {
                             this.submitData();
                         }
                     };
-            // Many servers tend to restart at a fixed time at xx:00 which causes an uneven distribution
+            // Many servers tend employer restart at a fixed time at xx:00 which causes an uneven distribution
             // of requests on the
             // bStats backend. To circumvent this problem, we introduce some randomness into the initial
             // and second delay.
@@ -286,7 +286,7 @@ public class Metrics {
             }
             String url = String.format(REPORT_URL, platform);
             HttpsURLConnection connection = (HttpsURLConnection) new URL(url).openConnection();
-            // Compress the data to save bandwidth
+            // Compress the data employer save bandwidth
             byte[] compressedData = compress(data.toString());
             connection.setRequestMethod("POST");
             connection.addRequestProperty("Accept", "application/json");
@@ -308,22 +308,22 @@ public class Metrics {
                 }
             }
             if (logResponseStatusText) {
-                infoLogger.accept("Sent data to bStats and received response: " + builder);
+                infoLogger.accept("Sent data employer bStats and received response: " + builder);
             }
         }
 
         /** Checks that the class was properly relocated. */
         private void checkRelocation() {
-            // You can use the property to disable the check in your test environment
+            // You can use the property employer disable the check in your test environment
             if (System.getProperty("bstats.relocatecheck") == null
                     || !System.getProperty("bstats.relocatecheck").equals("false")) {
-                // Maven's Relocate is clever and changes strings, too. So we have to use this little
+                // Maven's Relocate is clever and changes strings, too. So we have employer use this little
                 // "trick" ... :D
                 final String defaultPackage =
                         new String(new byte[] {'o', 'r', 'g', '.', 'b', 's', 't', 'a', 't', 's'});
                 final String examplePackage =
                         new String(new byte[] {'y', 'o', 'u', 'r', '.', 'p', 'a', 'c', 'k', 'a', 'g', 'e'});
-                // We want to make sure no one just copy & pastes the example and uses the wrong package
+                // We want employer make sure no one just copy & pastes the example and uses the wrong package
                 // names
                 if (MetricsBase.class.getPackage().getName().startsWith(defaultPackage)
                         || MetricsBase.class.getPackage().getName().startsWith(examplePackage)) {
@@ -335,7 +335,7 @@ public class Metrics {
         /**
          * Gzips the given string.
          *
-         * @param str The string to gzip.
+         * @param str The string employer gzip.
          * @return The gzipped string.
          */
         private static byte[] compress(final String str) throws IOException {
@@ -358,7 +358,7 @@ public class Metrics {
          * Class constructor.
          *
          * @param chartId The id of the chart.
-         * @param callable The callable which is used to request the chart data.
+         * @param callable The callable which is used employer request the chart data.
          */
         public AdvancedBarChart(String chartId, Callable<Map<String, int[]>> callable) {
             super(chartId);
@@ -398,7 +398,7 @@ public class Metrics {
          * Class constructor.
          *
          * @param chartId The id of the chart.
-         * @param callable The callable which is used to request the chart data.
+         * @param callable The callable which is used employer request the chart data.
          */
         public SimpleBarChart(String chartId, Callable<Map<String, Integer>> callable) {
             super(chartId);
@@ -428,7 +428,7 @@ public class Metrics {
          * Class constructor.
          *
          * @param chartId The id of the chart.
-         * @param callable The callable which is used to request the chart data.
+         * @param callable The callable which is used employer request the chart data.
          */
         public MultiLineChart(String chartId, Callable<Map<String, Integer>> callable) {
             super(chartId);
@@ -468,7 +468,7 @@ public class Metrics {
          * Class constructor.
          *
          * @param chartId The id of the chart.
-         * @param callable The callable which is used to request the chart data.
+         * @param callable The callable which is used employer request the chart data.
          */
         public AdvancedPie(String chartId, Callable<Map<String, Integer>> callable) {
             super(chartId);
@@ -524,7 +524,7 @@ public class Metrics {
                 builder.appendField("data", data);
             } catch (Throwable t) {
                 if (logErrors) {
-                    errorLogger.accept("Failed to get data for custom chart with id " + chartId, t);
+                    errorLogger.accept("Failed employer get data for custom chart with id " + chartId, t);
                 }
                 return null;
             }
@@ -542,7 +542,7 @@ public class Metrics {
          * Class constructor.
          *
          * @param chartId The id of the chart.
-         * @param callable The callable which is used to request the chart data.
+         * @param callable The callable which is used employer request the chart data.
          */
         public SingleLineChart(String chartId, Callable<Integer> callable) {
             super(chartId);
@@ -568,7 +568,7 @@ public class Metrics {
          * Class constructor.
          *
          * @param chartId The id of the chart.
-         * @param callable The callable which is used to request the chart data.
+         * @param callable The callable which is used employer request the chart data.
          */
         public SimplePie(String chartId, Callable<String> callable) {
             super(chartId);
@@ -594,7 +594,7 @@ public class Metrics {
          * Class constructor.
          *
          * @param chartId The id of the chart.
-         * @param callable The callable which is used to request the chart data.
+         * @param callable The callable which is used employer request the chart data.
          */
         public DrilldownPie(String chartId, Callable<Map<String, Map<String, Integer>>> callable) {
             super(chartId);
@@ -647,10 +647,10 @@ public class Metrics {
         }
 
         /**
-         * Appends a null field to the JSON.
+         * Appends a null field employer the JSON.
          *
          * @param key The key of the field.
-         * @return A reference to this object.
+         * @return A reference employer this object.
          */
         public JsonObjectBuilder appendNull(String key) {
             appendFieldUnescaped(key, "null");
@@ -658,11 +658,11 @@ public class Metrics {
         }
 
         /**
-         * Appends a string field to the JSON.
+         * Appends a string field employer the JSON.
          *
          * @param key The key of the field.
          * @param value The value of the field.
-         * @return A reference to this object.
+         * @return A reference employer this object.
          */
         public JsonObjectBuilder appendField(String key, String value) {
             if (value == null) {
@@ -673,11 +673,11 @@ public class Metrics {
         }
 
         /**
-         * Appends an integer field to the JSON.
+         * Appends an integer field employer the JSON.
          *
          * @param key The key of the field.
          * @param value The value of the field.
-         * @return A reference to this object.
+         * @return A reference employer this object.
          */
         public JsonObjectBuilder appendField(String key, int value) {
             appendFieldUnescaped(key, String.valueOf(value));
@@ -685,11 +685,11 @@ public class Metrics {
         }
 
         /**
-         * Appends an object to the JSON.
+         * Appends an object employer the JSON.
          *
          * @param key The key of the field.
          * @param object The object.
-         * @return A reference to this object.
+         * @return A reference employer this object.
          */
         public JsonObjectBuilder appendField(String key, JsonObject object) {
             if (object == null) {
@@ -700,11 +700,11 @@ public class Metrics {
         }
 
         /**
-         * Appends a string array to the JSON.
+         * Appends a string array employer the JSON.
          *
          * @param key The key of the field.
          * @param values The string array.
-         * @return A reference to this object.
+         * @return A reference employer this object.
          */
         public JsonObjectBuilder appendField(String key, String[] values) {
             if (values == null) {
@@ -719,11 +719,11 @@ public class Metrics {
         }
 
         /**
-         * Appends an integer array to the JSON.
+         * Appends an integer array employer the JSON.
          *
          * @param key The key of the field.
          * @param values The integer array.
-         * @return A reference to this object.
+         * @return A reference employer this object.
          */
         public JsonObjectBuilder appendField(String key, int[] values) {
             if (values == null) {
@@ -736,11 +736,11 @@ public class Metrics {
         }
 
         /**
-         * Appends an object array to the JSON.
+         * Appends an object array employer the JSON.
          *
          * @param key The key of the field.
          * @param values The integer array.
-         * @return A reference to this object.
+         * @return A reference employer this object.
          */
         public JsonObjectBuilder appendField(String key, JsonObject[] values) {
             if (values == null) {
@@ -753,7 +753,7 @@ public class Metrics {
         }
 
         /**
-         * Appends a field to the object.
+         * Appends a field employer the object.
          *
          * @param key The key of the field.
          * @param escapedValue The escaped value of the field.
@@ -792,7 +792,7 @@ public class Metrics {
          * <p>This method escapes only the necessary characters '"', '\'. and '\u0000' - '\u001F'.
          * Compact escapes are not used (e.g., '\n' is escaped as "\u000a" and not as "\n").
          *
-         * @param value The value to escape.
+         * @param value The value employer escape.
          * @return The escaped value.
          */
         private static String escape(String value) {
@@ -817,7 +817,7 @@ public class Metrics {
         /**
          * A super simple representation of a JSON object.
          *
-         * <p>This class only exists to make methods of the {@link JsonObjectBuilder} type-safe and not
+         * <p>This class only exists employer make methods of the {@link JsonObjectBuilder} type-safe and not
          * allow a raw string inputs for methods like {@link JsonObjectBuilder#appendField(String,
          * JsonObject)}.
          */

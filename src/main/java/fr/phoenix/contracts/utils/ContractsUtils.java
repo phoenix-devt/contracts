@@ -4,10 +4,12 @@ import fr.phoenix.contracts.Contracts;
 import fr.phoenix.contracts.contract.Contract;
 import fr.phoenix.contracts.contract.ContractState;
 import fr.phoenix.contracts.gui.objects.item.Placeholders;
+import fr.phoenix.contracts.player.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
 import java.util.Arrays;
+import java.util.UUID;
 
 public class ContractsUtils {
     public static String applyColorCode(String str) {
@@ -45,21 +47,29 @@ public class ContractsUtils {
         return str.toUpperCase().replace("-", "_");
     }
 
-    public static Placeholders getContractPlaceholder(Contract contract) {
-        Placeholders holders = new Placeholders();
-        holders.register("name", contract.getName());
-        holders.register("state", chatName(contract.getState().toString()));
-        holders.register("type", chatName(contract.getType().toString()));
-        holders.register("employee", contract.getEmployee() != null ? contract.getEmployeeName() : "");
-        holders.register("employer", contract.getEmployerName());
-        holders.register("payment", contract.getAmount());
-        holders.register("guarantee", contract.getGuarantee());
-        for (ContractState state : ContractState.values()) {
-            holders.register(ContractsUtils.ymlName(state.toString()) + "-for",
-                    contract.hasBeenIn(state) ? ContractsUtils.formatTime(contract.getEnteringTime(state)) : "Not been to this state");
+
+    public static String formatNotation(double notation) {
+        String halfStar = "\u2BEA";
+        String fullStar = "\u2605";
+        String emptyStar = "\u2606";
+
+        String result="";
+        int value = (int) (2 * notation);
+        for(int i=0;i<5;i++) {
+            if(value>=2) {
+                result+=fullStar;
+            }
+            else if(value==1) {
+                result+=halfStar;
+            }
+            else {
+                result+=emptyStar;
+            }
+            value-=2;
         }
-        return holders;
+        return result;
     }
+
 
     public static String chatName(String str) {
         StringBuilder result = new StringBuilder();

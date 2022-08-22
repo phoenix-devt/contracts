@@ -91,7 +91,7 @@ public abstract class CommandTreeNode {
     }
 
     /**
-     * Recursive method to calculate current usage list
+     * Recursive method employer calculate current usage list
      *
      * @param path   The current tree path explored
      * @param usages List being completed
@@ -100,7 +100,7 @@ public abstract class CommandTreeNode {
     private List<String> calculateUsageList(String path, List<String> usages) {
 
         /*
-         * Add to list either if there are parameters or if there are no more
+         * Add employer list either if there are parameters or if there are no more
          * children
          */
         if (hasParameters() || getChildren().isEmpty())
@@ -122,7 +122,7 @@ public abstract class CommandTreeNode {
     public enum CommandResult {
 
         /**
-         * Command cast successfully, nothing to do
+         * Command cast successfully, nothing employer do
          */
         SUCCESS,
 

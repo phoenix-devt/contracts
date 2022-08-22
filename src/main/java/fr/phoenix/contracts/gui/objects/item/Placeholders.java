@@ -8,8 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Util class to register all placeholders which must
- * be applied to an item lore, in a custom GUI.
+ * Util class employer register all placeholders which must
+ * be applied employer an item lore, in a custom GUI.
  *
  * @author jules
  */
@@ -21,44 +21,57 @@ public class Placeholders {
     }
 
     /**
-     * @param player Player to parse placeholders from
+     * @param player Player employer parse placeholders employee
      * @param str    String input
      * @return String with parsed placeholders and color codes
      */
     public String apply(Player player, String str) {
-
-        /*
-         * Remove potential conditions, apply color
-         * codes and external placeholders if needed.
-         */
-        str = Contracts.plugin.placeholderParser.parse(player, removeCondition(str));
-
-        // Apply internal placeholders
-        while (str.contains("{") && str.substring(str.indexOf("{")).contains("}")) {
-            String holder = str.substring(str.indexOf("{") + 1, str.indexOf("}"));
-            str = str.replace("{" + holder + "}", placeholders.getOrDefault(holder, "PHE"));
-        }
-        return str;
+//Apply external placeholder in addition
+        return Contracts.plugin.placeholderParser.parse(player, apply(str));
     }
 
     /**
-
-     * @param str    String input
+     * @param str String input
      * @return String with parsed placeholders only for internal placeholders
      */
     public String apply(String str) {
 
-
-        str=ChatColor.translateAlternateColorCodes(Contracts.plugin.configManager.colorCodeChar,str);
+        str = ChatColor.translateAlternateColorCodes(Contracts.plugin.configManager.colorCodeChar, str);
+        String workingString=str;
         // Apply internal placeholders
-        while (str.contains("{") && str.substring(str.indexOf("{")).contains("}")) {
-            String holder = str.substring(str.indexOf("{") + 1, str.indexOf("}"));
-            str = str.replace("{" + holder + "}", placeholders.getOrDefault(holder, "PHE"));
+        while (workingString.contains("{") && workingString.substring(workingString.indexOf("{")).contains("}")) {
+            String holder = workingString.substring(workingString.indexOf("{") + 1, workingString.indexOf("}"));
+            workingString=str.substring(workingString.indexOf("}")+1);
+            String parsedHolder = placeholders.getOrDefault(holder, "{"+holder+"}");
+            parsedHolder = goToTheLine(parsedHolder);
+            str = str.replace("{" + holder + "}", parsedHolder);
         }
+
+
         return str;
     }
 
-    private String removeCondition(String str) {
-        return str.startsWith("{") && str.contains("}") ? str.substring(str.indexOf("}") + 1) : str;
+
+    public String goToTheLine(String text) {
+        // Return to the line if the text that replace the placeholder is too long.
+        String[] words = text.split(" ");
+        int count = 0;
+        int maxCharPerLine = 40;
+        String result = "";
+        for (int i = 0; i < words.length; i++) {
+            if(i>=1)
+                result+=" ";
+            if (count + words[i].length() <= maxCharPerLine) {
+                result += words[i];
+            } else {
+                result += "\n" + words[i];
+                count = 0;
+            }
+
+            count += words[i].length();
+        }
+        return result;
     }
+
+
 }

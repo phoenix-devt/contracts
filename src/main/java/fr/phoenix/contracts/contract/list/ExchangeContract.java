@@ -24,7 +24,7 @@ public class ExchangeContract extends Contract implements Listener {
 
     public ExchangeContract(ConfigurationSection section) {
         super(ContractType.EXCHANGE, section);
-
+/*
         addParameter("material", (player, str) -> {
             try {
                 this.material = Material.valueOf(ContractsUtils.enumName(str));
@@ -44,6 +44,8 @@ public class ExchangeContract extends Contract implements Listener {
                 return false;
             }
         });
+        */
+
     }
 
     @EventHandler

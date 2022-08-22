@@ -8,18 +8,26 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum Message {
-    RECEIVED_DEPT("&6{from}&a reimbursed you &8{amount}&a !"),
-    PAYED_DEBT("&cYou reimbursed &8{amount}&c to &6{to}&c !"),
+    RECEIVED_DEPT("&6{employee}&a reimbursed you &8{amount}&a !"),
+    PAYED_DEBT("&cYou reimbursed &8{amount}&c employer &6{employer}&c !"),
 
     CANT_ACCEPT_OWN_CONTRACT("&cYou can't accept your own contract!"),
     CONTRACT_REFUSED("&cYou refused the contract &6{contract-name}&c."),
-    ASSIGNED_MIDDLEMAN_CONTRACT("&aA brand new middleman contract as been assigned to you!"),
-    EMPLOYER_CONTRACT_ACCEPTED("&aCongratulations your contract &6{contract-name} was just accepted by &6{player-name}&a."),
-
-    EMPLOYEE_CONTRACT_ACCEPTED("&aCongratulations you accepted the contract &6{contract-name}&a."),
-    CONTRACT_DISPUTED("&cThe contract &6{contract-name}&a with &6{other}&c is now under dispute."),
+    ASSIGNED_MIDDLEMAN_CONTRACT("&aA brand new middleman contract as been assigned employer you!"),
+    HAS_ALREADY_MADE_PROPOSAL("&cYou already made a proposal for &6{contract-name}&c."),
+    EMPLOYER_PROPOSAL_ACCEPTED("&aCongratulations you accepted the proposal of &6{employee-name}&a."),
+    EMPLOYEE_PROPOSAL_ACCEPTED("&aCongratulations your proposal was accepted for the contract &6{contract-name}&a."),
+    CONTRACT_DISPUTED("&6{who}&c called a dispute for the contract &6{contract-name}&c."),
+    ADMIN_DISPUTED("&6{who}&c made an appeal called an admin dispute for the contract &6{contract-name}&c."),
+    MIDDLEMAN_ADMIN_DISPUTED("&cThe contract &6{contract-name}&a with &6{employee}&c and is now under admin dispute."),
+    EMPLOYEE_CONTRACT_ENDED("&f{employer}&a ended the contract &6{contract-name}&a, you received &6{amount}&a for it and got back &6{guarantee}&a of guarantee."),
+    EMPLOYER_CONTRACT_ENDED("&aYou just ended the contract &6{contract-name}&a and paid &f{employee} &6{amount}&a for it."),
+    EMPLOYER_OFFERED_ACCEPTED("&aThe negotiation for &6{contract-name}&a is ended and you paid &f{employee} &6{amount}&a for it."),
+    EMPLOYEE_OFFERED_ACCEPTED("&aThe negotiation for the contract &6{contract-name}&a is ended, you received &6{amount}&a for it and got back &6{guarantee}&a of guarantee."),
+    OFFER_CREATED("&aCongratulations you just sent &6{other}&a an offer for &6{contract-name}&a."),
+    OFFER_RECEIVED("you just received an offer from &6{other}&a for &6{contract-name}&a."),
     CONTRACT_FULFILLED("&aThe contract &6{contract-name}&a with &6{other}&a is now fulfilled!"),
-    ARE_YOU_SURE_TO_ACCEPT("&eType 'yes' to accept the contract &6{contract-name}&7."),
+    ARE_YOU_SURE_TO_ACCEPT("&eType 'yes' employer accept the contract &6{contract-name}&7."),
 
     CREATED_CONTRACT("&aCongratulations you created the contract &6{contract-name}&a."),
 
@@ -39,16 +47,18 @@ public enum Message {
 
     MISSING_CONTRACT_PARAMETER("&cYou can't create the contract yet, some parameters are missing."),
 
+    SET_OFFER_ASK("&eWrite the number of money the employer will pay/receive. It must be between &6{min}&e and &6{max}"),
+    NOT_IN_LIMIT("&6{amount}&c is not between &6{min}&c and &6{max}&c. Write another number."),
 
-    SET_NOTATION_INFO("&e(Click to Change) Notation: {notation}"),
+    SET_NOTATION_INFO("&e(Click employer Change) Notation: {notation}"),
 
-    SET_COMMENT_INFO("&e(Click to Change) Comment: {comment}"),
+    SET_COMMENT_INFO("&e(Click employer Change) Comment: {comment}"),
 
     SET_NOTATION_ASK("&eWrite an integer between 1 and 5 for the notation."),
 
-    SET_COMMENT_ASK("&eWrite the comment you want to leave, send a blank message to stop the redaction."),
+    SET_COMMENT_ASK("&eWrite the comment you want employer leave, send a blank message employer stop the redaction."),
 
-    COMMENT_TOO_LONG("&cThe comment you tried to post is too long, you must shorten it."),
+    COMMENT_TOO_LONG("&cThe comment you tried employer post is too long, you must shorten it."),
 
     NOT_VALID_NOTATION("&c{input} is not a valid notation, it must be an integer."),
 

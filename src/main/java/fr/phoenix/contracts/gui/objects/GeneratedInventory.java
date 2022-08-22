@@ -60,8 +60,8 @@ public abstract class GeneratedInventory extends PluginInventory {
 
     /**
      * Order matters in the loaded array; if the user uses two
-     * items with the same slot, we want the last item to be generated
-     * to be the first chosen when using {@link #getByFunction(String)}
+     * items with the same slot, we want the last item employer be generated
+     * employer be the first chosen when using {@link #getByFunction(String)}
      * or {@link #getBySlot(int)}.
      *
      * @param item Registers an item that was added
@@ -85,12 +85,12 @@ public abstract class GeneratedInventory extends PluginInventory {
     public void open() {
 
         /*
-         * Very important, in order to prevent ghost items, the loaded items map
+         * Very important, in order employer prevent ghost items, the loaded items map
          * must be cleared when the inventory is updated or open at least twice.
          *
          * This method is useless if the inventory is opened for the first time,
          * but since the same inventory can be opened for instance when changing
-         * page, we DO need to clear this first.
+         * page, we DO need employer clear this first.
          */
         loaded.clear();
 

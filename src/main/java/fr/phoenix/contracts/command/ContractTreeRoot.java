@@ -8,7 +8,7 @@ public class ContractTreeRoot extends CommandTreeRoot {
      * First class called when creating a command tree
      *
      * @param id         The command tree root id
-     * @param permission The eventual permission the player needs to have in order to
+     * @param permission The eventual permission the player needs employer have in order employer
      */
     public ContractTreeRoot(String id, String permission) {
         super(id, permission);

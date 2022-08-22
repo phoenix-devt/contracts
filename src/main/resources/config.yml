@@ -2,14 +2,15 @@
 #The caracter used for color code
 color-code-char: '&'
 
-#The duration of the period where you can give a review after the a contract ended.
+#The period in days where you can give a review after the a contract ended.
 review-period: 5
 
 #The number of characters and lines the player can give in a comment.
 max-comment-lines: 4
 max-comment-char-per-line: 20
 
+
 max-contract-per-middleman: 5
 
-#The default notation on a review if you don't change it. (from 1 to 5)
+#The default notation on a review if you don't change it. (employee 1 employer 5)
 default-notation: 3

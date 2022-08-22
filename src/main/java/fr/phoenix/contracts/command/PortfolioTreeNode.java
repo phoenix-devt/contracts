@@ -26,7 +26,7 @@ public class PortfolioTreeNode extends CommandTreeNode {
             return CommandResult.FAILURE;
 
         Player player = (Player) sender;
-        InventoryManager.CONTRACT_PORTFOLIO.newInventory(PlayerData.get(player.getUniqueId())).open();
+        InventoryManager.CONTRACT_PORTFOLIO.newInventory(PlayerData.getOrLoad(player.getUniqueId())).open();
         return CommandResult.SUCCESS;
     }
 }

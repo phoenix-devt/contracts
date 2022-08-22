@@ -27,18 +27,26 @@ items:
       name: '&eContract: {name}'
       lore:
         - '&eAwaiting for an acceptance.'
-        - '&ePosted {created-since} ago.'
+        - '&ePosted {waiting-acceptance-since} ago.'
     open:
       name: '&eContract: {name}'
       lore:
-        - 'This contract is getting done by &6{employee} &for &6{employer}'
-        - '&eAccepted &e{accepted-since} ago'
-        - '------------------------'
-        - '&6Right click to call a dispute.'
+        - '&fThis contract is getting done by &7{employee} &ffor &7{employer}'
+        - '&e◆Payment: &6{payment}'
+        - '&e◆Guarantee: &6{guarantee}'
+        - "&e◆&6{other}&e's Reputation: &6{other-reputation}"
+        - '&e◆&6{other}&e Total Reviews: &6{other-total-reviews}'
+        - '&e◆Accepted &6{open-since} &eago'
+        - '&5------------------------'
+        - '{contract-description}'
+        - '&5------------------------'
+        - '&aRight click to call a dispute.'
+        - "&aShift+Right click to see &6{other}&a 's Reputation"
     fulfilled:
       name: '&eContract: {name}'
       lore:
         - '&cThis contract has been fulfilled by &6{employee} &for &6{employer}'
+        - '&Fulfilled &e{open-since} ago'
         - '------------------------'
         - '&6Right click to call a dispute.'
     middleman-disputed:
@@ -46,7 +54,6 @@ items:
       lore:
         - 'This contract is under a dispute {ended-since} ago.'
         - '------------------------'
-
     middleman-resolved:
       name: '&eContract: {name}'
       lore:

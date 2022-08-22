@@ -15,16 +15,14 @@ public class PlayerDataManager implements FileManager {
     private final Map<String, UUID> playerNames = new HashMap<>();
 
 
-    public PlayerData get(OfflinePlayer player) {
-        return players.get(player.getUniqueId());
+    public PlayerData getOrLoad(OfflinePlayer player) {
+        return getOrLoad(player.getUniqueId());
     }
 
-    public PlayerData get(UUID uuid) {
+    public PlayerData getOrLoad(UUID uuid) {
+        if (!players.containsKey(uuid))
+            setup(uuid);
         return players.get(uuid);
-    }
-
-    public UUID get(String str) {
-        return playerNames.get(str);
     }
 
 
@@ -46,7 +44,7 @@ public class PlayerDataManager implements FileManager {
 
 
     /**
-     * Used to load a player that is offline if needed
+     * Used employer load a player that is offline if needed
      *
      * @param uuid
      */

@@ -3,6 +3,7 @@ package fr.phoenix.contracts.gui;
 import fr.phoenix.contracts.Contracts;
 import fr.phoenix.contracts.contract.Contract;
 import fr.phoenix.contracts.contract.ContractType;
+import fr.phoenix.contracts.contract.Parameter;
 import fr.phoenix.contracts.gui.objects.EditableInventory;
 import fr.phoenix.contracts.gui.objects.GeneratedInventory;
 import fr.phoenix.contracts.gui.objects.item.InventoryItem;
@@ -13,6 +14,7 @@ import fr.phoenix.contracts.player.PlayerData;
 import fr.phoenix.contracts.utils.ContractsUtils;
 import fr.phoenix.contracts.utils.message.Message;
 import org.apache.commons.lang.Validate;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
@@ -34,9 +36,9 @@ public class ContractCreationViewer extends EditableInventory {
     public InventoryItem loadItem(String function, ConfigurationSection config) {
         if (function.equals("go-back"))
             return new GoBackItem(config);
-        if(function.equals("create"))
+        if (function.equals("create"))
             return new CreateItem(config);
-        if(function.equals("parameter"))
+        if (function.equals("parameter"))
             return new ParameterItem(config);
         return new SimpleItem(config);
     }
@@ -75,8 +77,8 @@ public class ContractCreationViewer extends EditableInventory {
             super(config);
             ConfigurationSection filledParameterSection = config.getConfigurationSection("filled");
             ConfigurationSection parameterToFillSection = config.getConfigurationSection("to-fill");
-            Validate.notNull(filledParameterSection, "Couldn't load filled for parameters in contract-creation.yml");
-            Validate.notNull(parameterToFillSection, "Couldn't load to-fill for parameters in contract-creation.yml");
+            Validate.notNull(filledParameterSection, "Couldn't load filled parameters in contract-creation.yml");
+            Validate.notNull(parameterToFillSection, "Couldn't load to-fill parameters in contract-creation.yml");
             filledParameter = new FilledParameter(this, filledParameterSection);
             parameterToFill = new ParameterToFill(this, parameterToFillSection);
         }
@@ -86,16 +88,16 @@ public class ContractCreationViewer extends EditableInventory {
             if (inv.parametersList.size() <= n) {
                 return new ItemStack(Material.AIR);
             }
-            String parameterId = inv.parametersList.get(n);
+            Parameter parameter = inv.parametersList.get(n);
 
             ItemStack item;
-            if (inv.contract.hasParameter(parameterId))
+            if (!parameter.needsToBeFilled())
                 item = filledParameter.getDisplayedItem(inv, n);
             else
                 item = parameterToFill.getDisplayedItem(inv, n);
             ItemMeta meta = item.getItemMeta();
             PersistentDataContainer container = meta.getPersistentDataContainer();
-            container.set(new NamespacedKey(Contracts.plugin, "parameter"), PersistentDataType.STRING, parameterId);
+            container.set(new NamespacedKey(Contracts.plugin, "parameter"), PersistentDataType.STRING, parameter.getId());
             item.setItemMeta(meta);
             return item;
         }
@@ -108,7 +110,14 @@ public class ContractCreationViewer extends EditableInventory {
         @Override
         public Placeholders getPlaceholders(ContractCreationInventory inv, int n) {
             Placeholders holders = new Placeholders();
-            holders.register("name",ContractsUtils.chatName(inv.parametersList.get(n)));
+            holders.register("id", ContractsUtils.chatName(inv.parametersList.get(n).getId()));
+            String result = "";
+            for (String str : inv.parametersList.get(n).getDescription())
+                result += "\n" + str;
+
+            if (result != "")
+                result = result.substring(1);
+            holders.register("description", result);
             return holders;
         }
     }
@@ -119,10 +128,24 @@ public class ContractCreationViewer extends EditableInventory {
             super(parent, config);
         }
 
+
         @Override
         public Placeholders getPlaceholders(ContractCreationInventory inv, int n) {
             Placeholders placeholders = parent.getPlaceholders(inv, n);
-            placeholders.register("value", inv.contract.getFilledParameter(inv.parametersList.get(n)));
+            List<String> valueString = inv.parametersList.get(n).get().stream().filter(str -> str != null).toList();
+
+            if (valueString.size() == 1) {
+                placeholders.register("value", valueString.get(0));
+            }
+            //If there is more than 1 line we go to the line
+            else {
+                String result = "";
+                for (String str : valueString) {
+                    result += "\n" + str;
+                }
+                placeholders.register("value", result);
+            }
+
             return placeholders;
         }
     }
@@ -143,7 +166,7 @@ public class ContractCreationViewer extends EditableInventory {
     public class ContractCreationInventory extends GeneratedInventory {
         private ContractType contractType;
         private Contract contract;
-        private List<String> parametersList;
+        private List<Parameter> parametersList;
 
 
         public ContractCreationInventory(PlayerData playerData, EditableInventory editable, ContractType contractType) {
@@ -161,11 +184,13 @@ public class ContractCreationViewer extends EditableInventory {
 
         @Override
         public void whenClicked(InventoryClickEvent event, InventoryItem item) {
+            if(event.getCurrentItem().getType()==Material.AIR)
+                return;
             if (item instanceof GoBackItem) {
                 InventoryManager.CONTRACT_TYPE.newInventory(playerData, ContractTypeViewer.InventoryToOpenType.CREATION_VIEWER).open();
             }
             if (item instanceof CreateItem) {
-                if (!contract.hasAllParameters()) {
+                if (!contract.allParameterFilled()) {
                     Message.MISSING_CONTRACT_PARAMETER.format().send(player);
                 } else {
                     //Create the contract and close the inventory

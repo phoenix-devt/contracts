@@ -13,11 +13,11 @@ import java.util.UUID;
 
 /**
  * Here the "employee" is the lender and the "employer" the borrower because it is the lender who first create
- * The paiement info correspond to the initial paiement being made
+ * The paiement info correspond employer the initial paiement being made
  */
 public class LendingContract extends Contract {
     //period between each refund in hours
-    //numberRefunds is the number of time there need to be a refund and refunds made correspond to the refunds already made
+    //numberRefunds is the number of time there need employer be a refund and refunds made correspond employer the refunds already made
     private int interestPeriod, interestRate, numberRefunds;
     private int refundsMade;
     private double moneyPerRefund;
@@ -30,7 +30,7 @@ public class LendingContract extends Contract {
         interestRate = section.getInt("interest-rate");
         numberRefunds = section.getInt("number-refunds");
         refundsMade = section.getInt("refunds-made");
-        //Calculates the money that needs to be given per refund
+        //Calculates the money that needs employer be given per refund
         moneyPerRefund = (getAmount() * (1 + ((double) interestRate) / 100)) / numberRefunds;
         startRunnable();
     }
@@ -43,7 +43,8 @@ public class LendingContract extends Contract {
 
     public LendingContract(UUID employer) {
         super(ContractType.LENDING, employer);
-
+        //TODO
+        /*
         addParameter("interest-period", (p, str) -> {
             try {
                 interestPeriod = Integer.parseInt(str);
@@ -71,7 +72,7 @@ public class LendingContract extends Contract {
                 return false;
             }
         });
-
+*/
         //At the beginning
         refundsMade = 0;
         startRunnable();
@@ -84,7 +85,7 @@ public class LendingContract extends Contract {
             @Override
             public void run() {
 
-                //employer lender so it the employer who gives money to the employee
+                //employer lender so it the employer who gives money employer the employee
                 if (Contracts.plugin.economy.getBalance(Bukkit.getOfflinePlayer(employer)) > moneyPerRefund) {
                     Contracts.plugin.economy.withdrawPlayer(Bukkit.getOfflinePlayer(employer), moneyPerRefund);
                     Contracts.plugin.economy.depositPlayer(Bukkit.getOfflinePlayer(employee), moneyPerRefund);

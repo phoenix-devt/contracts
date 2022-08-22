@@ -6,6 +6,7 @@ import fr.phoenix.contracts.gui.objects.GeneratedInventory;
 import fr.phoenix.contracts.gui.objects.item.InventoryItem;
 import fr.phoenix.contracts.gui.objects.item.Placeholders;
 import fr.phoenix.contracts.player.PlayerData;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -15,14 +16,12 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
- * GUI to accept one decision. Receives some data through T.
+ * GUI employer accept one decision. Receives some data through T.
  */
-public class ConfirmationViewer<T> extends EditableInventory {
-    private final BiConsumer<ConfirmationInventory, T> consumer;
+public class ConfirmationViewer extends EditableInventory {
 
-    public ConfirmationViewer(BiConsumer<ConfirmationInventory, T> consumer) {
+    public ConfirmationViewer() {
         super("confirmation");
-        this.consumer = consumer;
     }
 
     @Override
@@ -35,15 +34,9 @@ public class ConfirmationViewer<T> extends EditableInventory {
         return null;
     }
 
-    /**
-     * Tells the Confirmation GUI what is has to do when the player clicks on Yes.
-     */
-    public void accept(ConfirmationInventory inv, T t) {
-        consumer.accept(inv, t);
-    }
 
-    public ConfirmationInventory generate(GeneratedInventory previous, T t) {
-        return new ConfirmationInventory<T>(previous.getPlayerData(), this, previous, t);
+    public ConfirmationInventory generate(GeneratedInventory previous,Runnable runnable) {
+        return new ConfirmationInventory(previous.getPlayerData(), this, previous,runnable);
     }
 
     public class BackItem extends InventoryItem<ConfirmationInventory> {
@@ -72,14 +65,15 @@ public class ConfirmationViewer<T> extends EditableInventory {
     }
 
 
-    public class ConfirmationInventory<T> extends GeneratedInventory {
+    public class ConfirmationInventory extends GeneratedInventory {
         private final GeneratedInventory previous;
-        private final T t;
+        private final Runnable runnable;
 
-        public ConfirmationInventory(PlayerData playerData, EditableInventory editable, GeneratedInventory previous, T t) {
+
+        public ConfirmationInventory(PlayerData playerData, EditableInventory editable, GeneratedInventory previous, Runnable runnable) {
             super(playerData, editable);
             this.previous = previous;
-            this.t=t;
+            this.runnable=runnable;
         }
 
         @Override
@@ -93,7 +87,7 @@ public class ConfirmationViewer<T> extends EditableInventory {
                 previous.open();
             }
             if (item.getFunction().equals("yes")) {
-                ((ConfirmationViewer) getEditable()).accept(this, t);
+                runnable.run();
                 player.getOpenInventory().close();
             }
         }

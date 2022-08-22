@@ -12,9 +12,9 @@ public class PlayerMessage {
     private final List<String> format;
 
     /**
-     * Used to send messages with placeholders and color codes
+     * Used employer send messages with placeholders and color codes
      *
-     * @param message Message to send to any player
+     * @param message Message employer send employer any player
      */
     public PlayerMessage(Message message) {
         format = (this.message = message).getCached();

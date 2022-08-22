@@ -13,9 +13,11 @@ import fr.phoenix.contracts.manager.InventoryManager;
 import fr.phoenix.contracts.player.PlayerData;
 import fr.phoenix.contracts.utils.ContractsUtils;
 import fr.phoenix.contracts.utils.message.Message;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -85,13 +87,8 @@ public class ContractMarketViewer extends EditableInventory {
         @Override
         public Placeholders getPlaceholders(ContractMarketInventory inv, int n) {
             Contract contract = inv.displayedContracts.get(inv.page + n);
-            Placeholders holders = new Placeholders();
-            holders.register("name", contract.getName());
-            holders.register("employer", contract.getEmployerName());
-            holders.register("payment-amount", contract.getAmount());
-            holders.register("created-since", ContractsUtils.formatTime(contract.getEnteringTime(ContractState.WAITING_ACCEPTANCE)));
-
-            //TODO: Un item par type de contrat
+            Placeholders holders = contract.getContractPlaceholder(inv.getPlayerData());
+            holders.register("already-proposed",contract.hasAlreadyProposed(inv.getPlayerData()));
             return holders;
         }
     }
@@ -158,6 +155,9 @@ public class ContractMarketViewer extends EditableInventory {
 
         @Override
         public void whenClicked(InventoryClickEvent event, InventoryItem item) {
+            if (event.getCurrentItem().getType() == Material.AIR)
+                return;
+
             if (item instanceof GoBackItem) {
                 InventoryManager.CONTRACT_TYPE.newInventory(playerData, ContractTypeViewer.InventoryToOpenType.MARKET_VIEWER).open();
             }
@@ -173,17 +173,24 @@ public class ContractMarketViewer extends EditableInventory {
                 Contract contract = Contracts.plugin.contractManager.get(UUID.fromString(Objects.requireNonNull(event.getCurrentItem().getItemMeta().getPersistentDataContainer()
                         .get(new NamespacedKey(Contracts.plugin, "contract"), PersistentDataType.STRING))));
                 //If left click, shows the reputation of the player
-                if (event.getAction().equals(InventoryAction.PICKUP_HALF)) {
-                    InventoryManager.REPUTATION.newInventory(playerData, PlayerData.get(contract.getEmployer()), this).open();
+                if (event.getClick() == ClickType.SHIFT_RIGHT) {
+                    InventoryManager.REPUTATION.newInventory(playerData, PlayerData.getOrLoad(contract.getEmployer()), this).open();
                 }
-                if (event.getAction().equals(InventoryAction.PICKUP_ALL)) {
+                if (event.getClick() == ClickType.LEFT) {
                     if (playerData.getUuid().equals(contract.getEmployer())) {
                         Message.CANT_ACCEPT_OWN_CONTRACT.format().send(player);
                         return;
                     }
+                    if(contract.hasAlreadyProposed(playerData)) {
+                        Message.HAS_ALREADY_MADE_PROPOSAL.format("contract-name",contract.getName()).send(player);
+                        return;
+                    }
 
-                    InventoryManager.CONTRACT_ACCEPT_CONFIRMATION.generate(this,contract).open();
-
+                    InventoryManager.CONFIRMATION.generate(this,() ->
+                    {//We must run sync
+                        Bukkit.getScheduler().scheduleSyncDelayedTask(Contracts.plugin, () ->
+                                contract.makeProposal(getPlayerData()));
+                    }).open();
                 }
             }
 

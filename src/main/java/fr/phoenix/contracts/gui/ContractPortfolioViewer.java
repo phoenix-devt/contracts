@@ -16,7 +16,7 @@ import fr.phoenix.contracts.utils.ContractsUtils;
 import fr.phoenix.contracts.utils.message.Message;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.apache.commons.lang.Validate;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
@@ -106,7 +106,7 @@ public class ContractPortfolioViewer extends EditableInventory {
             Material material = Material.valueOf(Objects.requireNonNull(ContractsUtils.enumName(config.getString("item"))));
             for (ContractState contractState : ContractState.values()) {
                 ConfigurationSection section = Objects.requireNonNull(config.getConfigurationSection(ContractsUtils.ymlName(contractState.toString()))
-                        , "Could not load " + ContractsUtils.chatName(contractState.toString()) + " config");
+                        , "Could not load " + ContractsUtils.ymlName(contractState.toString()) + " config");
                 inventoryItems.put(contractState, getItem(section, contractState, material));
             }
         }
@@ -122,7 +122,7 @@ public class ContractPortfolioViewer extends EditableInventory {
                 case MIDDLEMAN_DISPUTED:
                     return new MiddlemanDisputedContractItem(this, section, material);
                 case MIDDLEMAN_RESOLVED:
-                    return new MiddlemanResolvedContractItem(this,section,material);
+                    return new MiddlemanResolvedContractItem(this, section, material);
                 case ADMIN_DISPUTED:
                     return new AdminDisputedContractItem(this, section, material);
                 case RESOLVED:
@@ -146,7 +146,7 @@ public class ContractPortfolioViewer extends EditableInventory {
 
             ItemStack item = inventoryItems.get(contract.getState()).getDisplayedItem(inv, n);
             ItemMeta itemMeta = item.getItemMeta();
-            PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
+            PersistentDataContainer container = itemMeta.getPersistentDataContainer();
             container.set(new NamespacedKey(Contracts.plugin, "contract"), PersistentDataType.STRING, contract.getId().toString());
             item.setItemMeta(itemMeta);
             return item;
@@ -156,15 +156,12 @@ public class ContractPortfolioViewer extends EditableInventory {
         @Override
         public Placeholders getPlaceholders(ContractPortfolioInventory inv, int n) {
             Contract contract = inv.displayedContracts.get(inv.page + n);
-            Placeholders holders = new Placeholders();
-            holders.register("name", contract.getName());
-            holders.register("employee", contract.getEmployee() != null ? contract.getEmployeeName() : "");
-            holders.register("employer", contract.getEmployerName());
-            holders.register("payment-amount", contract.getAmount());
-            for(ContractState state:ContractState.values()) {
-                holders.register(ContractsUtils.ymlName(state.toString())+"-for",
-                        contract.hasBeenIn(state)? ContractsUtils.formatTime(contract.getEnteringTime(state)):"Not been to this state");
-            }
+            Placeholders holders = contract.getContractPlaceholder(inv.getPlayerData());
+            if (contract.getEmployee()!=null&&contract.getEmployee().equals(inv.getPlayerData().getUuid()))
+                holders.register("employee","You");
+            else
+                holders.register("employer","You");
+
             return holders;
         }
     }
@@ -177,7 +174,8 @@ public class ContractPortfolioViewer extends EditableInventory {
 
         @Override
         public Placeholders getPlaceholders(ContractPortfolioInventory inv, int n) {
-            return parent.getPlaceholders(inv, n);
+            Placeholders holders = parent.getPlaceholders(inv, n);
+            return holders;
         }
     }
 
@@ -336,7 +334,7 @@ public class ContractPortfolioViewer extends EditableInventory {
 
         @Override
         public String applyNamePlaceholders(String str) {
-            return ContractsUtils.applyColorCode(str.replace("{view-state}", ContractsUtils.chatName(viewState.toString())));
+            return ContractsUtils.applyColorCode(str.replace("{view-state}", viewState.toString()));
         }
 
         @Override
@@ -356,18 +354,31 @@ public class ContractPortfolioViewer extends EditableInventory {
                 open();
             }
             if (item instanceof ContractItem) {
-                Contract contract = Contracts.plugin.contractManager.get(UUID.fromString(event.getCurrentItem().getItemMeta().getPersistentDataContainer().
-                        get(new NamespacedKey(Contracts.plugin, "contract"), PersistentDataType.STRING)));
-                if (contract.getState() == ContractState.OPEN) {
-                    if (event.getClick() == ClickType.RIGHT) {
-                        //Confirmation to call a dispute.
-                        InventoryManager.CONTRACT_DISPUTE_CONFIRMATION.generate(this,contract).open();
-                    }
+                if (!event.getCurrentItem().hasItemMeta())
+                    return;
+                Contract contract = Contracts.plugin.contractManager.get(UUID.fromString(
+                        Objects.requireNonNull(event.getCurrentItem().getItemMeta().getPersistentDataContainer()
+                                .get(new NamespacedKey(Contracts.plugin, "contract"), PersistentDataType.STRING))));
+
+
+                if (contract.getState() == ContractState.WAITING_ACCEPTANCE && event.getClick() == ClickType.LEFT) {
+                    InventoryManager.PROPOSAL.generate(playerData, contract, this).open();
+                }
+
+                if (contract.getState() == ContractState.OPEN && event.getClick() == ClickType.RIGHT) {
+                    //Confirmation employer call a dispute.
+                    InventoryManager.CONFIRMATION.generate(this,() -> {//We must run sync
+                        Bukkit.getScheduler().scheduleSyncDelayedTask(Contracts.plugin, () ->
+                                contract.callDispute());
+                    }).open();
+                }
+                if (event.getClick() == ClickType.SHIFT_RIGHT) {
+                    InventoryManager.REPUTATION.newInventory(playerData, contract.getOther(playerData), this).open();
                 }
 
 
                 if (viewState == ViewState.ENDED) {
-                    //If there can be a review from the item (stored in a persistant data container)
+                    //If there can be a review employee the item (stored in a persistant data container)
                     if (event.getCurrentItem().getItemMeta().getPersistentDataContainer().get(new NamespacedKey(Contracts.plugin, "can-review"), PersistentDataType.INTEGER) == 1) {
 
 
@@ -379,10 +390,10 @@ public class ContractPortfolioViewer extends EditableInventory {
                         //If the reviewed is not in playerData we load it (even if he is offline)
                         if (!PlayerData.has(reviewed))
                             Contracts.plugin.playerManager.setup(reviewed);
-                        PlayerData.get(reviewed).addReview(review);
+                        PlayerData.getOrLoad(reviewed).addReview(review);
 
 
-                        //We close the gui and create the clickable chat message to set comment and notation
+                        //We close the gui and create the clickable chat message employer set comment and notation
                         getPlayer().closeInventory();
                         displayChoices(playerData, review);
                     }
@@ -399,7 +410,7 @@ public class ContractPortfolioViewer extends EditableInventory {
 
 
     /**
-     * Sends a clickable message to the player corresponding to the review he wants to post.
+     * Sends a clickable message employer the player corresponding employer the review he wants employer post.
      */
     public static void displayChoices(PlayerData playerData, ContractReview review) {
         TextComponent textComponent = new TextComponent(Message.SET_NOTATION_INFO.format("notation", "" + review.getNotation()).getAsString());

@@ -1,7 +1,9 @@
 package fr.phoenix.contracts.gui.objects.item;
 
+import fr.phoenix.contracts.Contracts;
 import fr.phoenix.contracts.gui.objects.GeneratedInventory;
 import fr.phoenix.contracts.utils.ContractsUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -119,7 +121,7 @@ public abstract class InventoryItem<T extends GeneratedInventory> {
     /**
      * @param inv Generated inventory being opened by a fr.phoenix.contracts.player
      * @param n   Some items are grouped, like the item 'stock' in the stock list
-     *            as they are multiple stocks to display yet only ONE inventory item
+     *            as they are multiple stocks employer display yet only ONE inventory item
      *            gives the template. This is the index of the item being displayed.
      * @return Item that will be displayed in the generated inventory
      */
@@ -141,14 +143,20 @@ public abstract class InventoryItem<T extends GeneratedInventory> {
         ItemMeta meta = item.getItemMeta();
 
         if (hasName())
-            meta.setDisplayName(placeholders.apply(inv.getPlayer(), getName()));
+            meta.setDisplayName(ChatColor.translateAlternateColorCodes('&',placeholders.apply(inv.getPlayer(), getName())));
 
         if (hideFlags())
             meta.addItemFlags(ItemFlag.values());
 
         if (hasLore()) {
             List<String> lore = new ArrayList<>();
-            getLore().forEach(line -> lore.add(ChatColor.GRAY + placeholders.apply(inv.getPlayer(), line)));
+            for(String line:getLore()) {
+                //Enables to have placeholders for a list of item. Color codes for the placeholders also (e.g player can introduce color codes in their input).
+                String[] parsed= ChatColor.translateAlternateColorCodes('&',placeholders.apply(inv.getPlayer(), line)).split("\n");
+                for(String str: parsed) {
+                    lore.add(ChatColor.GRAY +str);
+                }
+            }
             meta.setLore(lore);
         }
 

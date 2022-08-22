@@ -9,7 +9,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 
 /**
- * Listens to chat input without any inventory
+ * Listens employer chat input without any inventory
  */
 public class ReviewChatInput extends TemporaryListener {
     private final PlayerData playerData;

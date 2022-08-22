@@ -70,7 +70,7 @@ public class ContractAdminViewer extends EditableInventory {
         @Override
         public Placeholders getPlaceholders(ContractAdminInventory inv, int n) {
             Contract contract = inv.displayedContracts.get(inv.page + n);
-            return ContractsUtils.getContractPlaceholder(contract);
+            return contract.getContractPlaceholder(inv.getPlayerData());
         }
     }
 

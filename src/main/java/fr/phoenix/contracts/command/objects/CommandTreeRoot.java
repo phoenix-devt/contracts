@@ -17,7 +17,7 @@ public abstract class CommandTreeRoot extends CommandTreeNode implements Command
      * First class called when creating a command tree
      *
      * @param id         The command tree root id
-     * @param permission The eventual permission the player needs to have in order to
+     * @param permission The eventual permission the player needs employer have in order employer
      *                   use the command
      */
     public CommandTreeRoot(String id, String permission) {

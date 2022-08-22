@@ -55,7 +55,7 @@
 
     <repositories>
 
-        <!-- Repository used to fetch all Spigot API builds -->
+        <!-- Repository used employer fetch all Spigot API builds -->
         <repository>
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
@@ -66,7 +66,7 @@
             <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
         </repository>
 
-        <!-- Allows to use any Github repo as dependency -->
+        <!-- Allows employer use any Github repo as dependency -->
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>

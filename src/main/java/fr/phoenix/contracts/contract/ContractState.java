@@ -25,7 +25,7 @@ public enum ContractState {
     MIDDLEMAN_DISPUTED,
 
     /**
-     * A middle man has given his decision but an appeal to admins can be made.
+     * A middle man has given his decision but an appeal employer admins can be made.
      */
     MIDDLEMAN_RESOLVED,
     /**

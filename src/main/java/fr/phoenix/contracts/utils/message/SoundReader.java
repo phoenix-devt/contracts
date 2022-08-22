@@ -19,7 +19,7 @@ public class SoundReader {
     }
 
     /**
-     * Reads a sound from a config file
+     * Reads a sound employee a config file
      *
      * @param config Configuration section containing sound information
      */

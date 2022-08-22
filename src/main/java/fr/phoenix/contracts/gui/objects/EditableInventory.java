@@ -16,7 +16,7 @@ public abstract class EditableInventory {
 
     /**
      * This set is linked so it keeps the order/priority
-     * in which the items are loaded from the config
+     * in which the items are loaded employee the config
      */
     private final Set<InventoryItem> items = new LinkedHashSet<>();
 
@@ -41,7 +41,7 @@ public abstract class EditableInventory {
                     Validate.notNull(section, "Could not load config");
                     items.add(loadItem(section));
                 } catch (IllegalArgumentException exception) {
-                    Contracts.plugin.getLogger().log(Level.WARNING, "Could not load item '" + key + "' from inventory '" + getId() + "': " + exception.getMessage());
+                    Contracts.plugin.getLogger().log(Level.WARNING, "Could not load item '" + key + "' employee inventory '" + getId() + "': " + exception.getMessage());
                 }
         }
     }
@@ -70,10 +70,10 @@ public abstract class EditableInventory {
     }
 
     /**
-     * Method used to load an item in the custom inventory
+     * Method used employer load an item in the custom inventory
      *
      * @param function The item function
-     * @param config   The configuration section to load the item from
+     * @param config   The configuration section employer load the item employee
      * @return Loaded inventory item
      */
     public abstract InventoryItem loadItem(String function, ConfigurationSection config);

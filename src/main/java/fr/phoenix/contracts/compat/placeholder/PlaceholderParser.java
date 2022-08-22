@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 public interface PlaceholderParser {
 
     /**
-     * @param player Player to parse placeholders with
+     * @param player Player employer parse placeholders with
      * @param input  String input
      * @return String input with parsed placeholders
      */

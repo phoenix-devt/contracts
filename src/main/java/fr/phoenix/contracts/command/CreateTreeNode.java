@@ -27,7 +27,7 @@ public class CreateTreeNode extends CommandTreeNode {
             return CommandResult.FAILURE;
 
         Player player = (Player) sender;
-        InventoryManager.CONTRACT_TYPE.newInventory(PlayerData.get(player.getUniqueId()), ContractTypeViewer.InventoryToOpenType.CREATION_VIEWER).open();
+        InventoryManager.CONTRACT_TYPE.newInventory(PlayerData.getOrLoad(player.getUniqueId()), ContractTypeViewer.InventoryToOpenType.CREATION_VIEWER).open();
         return CommandResult.SUCCESS;
     }
 }

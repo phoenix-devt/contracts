@@ -27,7 +27,7 @@ public class MarketTreeNode extends CommandTreeNode {
             return CommandResult.FAILURE;
 
         Player player = (Player) sender;
-        InventoryManager.CONTRACT_TYPE.newInventory(PlayerData.get(player.getUniqueId()), ContractTypeViewer.InventoryToOpenType.MARKET_VIEWER).open();
+        InventoryManager.CONTRACT_TYPE.newInventory(PlayerData.getOrLoad(player.getUniqueId()), ContractTypeViewer.InventoryToOpenType.MARKET_VIEWER).open();
         return CommandResult.SUCCESS;
     }
 }

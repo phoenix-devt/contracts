@@ -49,14 +49,14 @@ public class ReputationViewerCommand extends BukkitCommand {
         Player player = (Player) sender;
         if (args[0].equals(NOTATION_ASK)) {
             Message.SET_NOTATION_ASK.format().send(player);
-            new ReviewChatInput(PlayerData.get(player), review, InputHandler.SET_NOTATION);
+            new ReviewChatInput(PlayerData.getOrLoad(player), review, InputHandler.SET_NOTATION);
             return true;
         }
         if (args[0].equals(COMMENT_ASK)) {
             //We remove the old comment and we replace it
             review.removeComment();
             Message.SET_COMMENT_ASK.format().send(player);
-            new ReviewChatInput(PlayerData.get(player), review, InputHandler.SET_COMMENT);
+            new ReviewChatInput(PlayerData.getOrLoad(player), review, InputHandler.SET_COMMENT);
             return true;
         }
         return false;

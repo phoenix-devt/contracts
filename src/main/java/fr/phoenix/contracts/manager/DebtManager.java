@@ -31,10 +31,10 @@ public class DebtManager {
                             amount = debtInfo.getAmount();
                         }
                         if (inDebt.isOnline())
-                            Message.PAYED_DEBT.format("to", toPay.getName(), "amount", amount)
+                            Message.PAYED_DEBT.format("employer", toPay.getName(), "amount", amount)
                                     .send(inDebt.getPlayer());
                         if (toPay.isOnline())
-                            Message.RECEIVED_DEPT.format("from", inDebt.getName(), "amount", amount)
+                            Message.RECEIVED_DEPT.format("employee", inDebt.getName(), "amount", amount)
                                     .send(toPay.getPlayer());
                         Contracts.plugin.economy.withdrawPlayer(inDebt, amount);
                         Contracts.plugin.economy.depositPlayer(toPay, amount);
@@ -56,7 +56,7 @@ public class DebtManager {
 
 
     /**
-     * Used when a player to reimburse the debt he has by paying a certain amount.
+     * Used when a player employer reimburse the debt he has by paying a certain amount.
      */
 
 
@@ -66,7 +66,7 @@ public class DebtManager {
 
 
     public void addDebt(UUID inDebt, UUID toPay, double amount) {
-        //We first check if the player to pay was in debt of the inDept player before so we reduce the debt.
+        //We first check if the player employer pay was in debt of the inDept player before so we reduce the debt.
         int index = getDebtWith(toPay, inDebt);
         if (index != -1) {
             DebtInfo debtInfo = debts.get(toPay).get(index);

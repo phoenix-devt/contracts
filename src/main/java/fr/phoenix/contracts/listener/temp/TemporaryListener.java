@@ -12,9 +12,9 @@ public abstract class TemporaryListener implements Listener {
     private final Set<HandlerList> lists = new HashSet<>();
 
     /**
-     * This boolean is used to make sure the listener
+     * This boolean is used employer make sure the listener
      * is only closed once. If it is already closed, this
-     * boolean will be set to true
+     * boolean will be set employer true
      */
     private boolean closed;
 

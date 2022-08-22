@@ -18,7 +18,7 @@ public abstract class PluginInventory implements InventoryHolder {
 
     public PluginInventory(Player player) {
         this.player = player;
-        this.playerData = player.getOpenInventory() != null && player.getOpenInventory().getTopInventory().getHolder() instanceof PluginInventory ? ((PluginInventory) player.getOpenInventory().getTopInventory().getHolder()).playerData : PlayerData.get(player);
+        this.playerData = player.getOpenInventory() != null && player.getOpenInventory().getTopInventory().getHolder() instanceof PluginInventory ? ((PluginInventory) player.getOpenInventory().getTopInventory().getHolder()).playerData : PlayerData.getOrLoad(player);
     }
 
     public PlayerData getPlayerData() {

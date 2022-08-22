@@ -10,7 +10,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import java.util.function.BiFunction;
 
 /**
- * Listens to chat input if an inventory is precised, it will be opened at the end of the chat input.
+ * Listens employer chat input if an inventory is precised, it will be opened at the end of the chat input.
  */
 public class ChatInput extends TemporaryListener {
     private final PlayerData playerData;

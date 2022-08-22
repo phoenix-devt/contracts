@@ -27,16 +27,16 @@ public class ReputationTreeNode extends CommandTreeNode {
         }
         Player player = (Player) sender;
         if (args.length == 1) {
-            InventoryManager.REPUTATION.newInventory(PlayerData.get(player.getUniqueId())).open();
+            InventoryManager.REPUTATION.newInventory(PlayerData.getOrLoad(player.getUniqueId())).open();
             return CommandResult.SUCCESS;
         }
         if (args.length == 2) {
-            PlayerData reputationPlayer = PlayerData.get(args[1]);
+            PlayerData reputationPlayer = PlayerData.getOrLoad(args[1]);
             if (reputationPlayer == null) {
                 Message.NOT_VALID_PLAYER.format("input", args[2]).send(player);
                 return CommandResult.FAILURE;
             }
-            InventoryManager.REPUTATION.newInventory(PlayerData.get(player.getUniqueId()), reputationPlayer).open();
+            InventoryManager.REPUTATION.newInventory(PlayerData.getOrLoad(player.getUniqueId()), reputationPlayer).open();
             return CommandResult.SUCCESS;
         }
         //If length !=2 and !=3

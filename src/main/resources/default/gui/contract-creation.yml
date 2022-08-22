@@ -24,4 +24,4 @@ items:
       item: BOOK
       name: '&6{name}'
       lore:
-        - '&cThis parameter needs to be filled!'
+        - '&cThis parameter needs employer be filled!'

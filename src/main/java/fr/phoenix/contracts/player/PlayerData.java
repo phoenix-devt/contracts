@@ -1,7 +1,6 @@
 package fr.phoenix.contracts.player;
 
 import fr.phoenix.contracts.Contracts;
-import fr.phoenix.contracts.manager.MiddlemenManager;
 import fr.phoenix.contracts.utils.ConfigFile;
 import fr.phoenix.contracts.contract.Contract;
 import fr.phoenix.contracts.contract.ContractState;
@@ -82,6 +81,14 @@ public class PlayerData {
         contractReviews.put(review.getUuid(), review);
         numberReviews++;
         meanNotation = ((double) (totalNotation + review.getNotation())) / ((double) numberReviews);
+    }
+
+    public int getNumberReviews() {
+        return numberReviews;
+    }
+
+    public double getMeanNotation() {
+        return meanNotation;
     }
 
     /**
@@ -169,17 +176,18 @@ public class PlayerData {
         return Contracts.plugin.playerManager.has(uuid);
     }
 
-    public static PlayerData get(String name) {
-        UUID uuid = Contracts.plugin.playerManager.get(name);
-        return uuid == null ? null : PlayerData.get(uuid);
+
+
+    public static PlayerData getOrLoad(Player player) {
+        return Contracts.plugin.playerManager.getOrLoad(player);
     }
 
-    public static PlayerData get(Player player) {
-        return Contracts.plugin.playerManager.get(player);
+    public static PlayerData getOrLoad(UUID uuid) {
+        return Contracts.plugin.playerManager.getOrLoad(uuid);
     }
 
-    public static PlayerData get(UUID uuid) {
-        return Contracts.plugin.playerManager.get(uuid);
+    public static PlayerData getOrLoad(String name) {
+        return Contracts.plugin.playerManager.getOrLoad(Bukkit.getOfflinePlayer(name));
     }
 
     public void updatePlayer(Player player) {

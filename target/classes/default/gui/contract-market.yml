@@ -1,4 +1,4 @@
-name: '&Market for &6{type} &eContracts.'
+name: '&8Market for &6{type} &8Contracts.'
 slots: 27
 
 items:
@@ -6,20 +6,23 @@ items:
     name: '&cGo Back'
     function: 'go-back'
     item: OAK_SIGN
+    slots: [18]
 
   next-page:
     function: 'next-page'
     name: '&Next Page'
     item: ARROW
+    slots: [17]
 
   previous-page:
     function: 'previous-page'
     name: '&cPrevious Page'
     item: ARROW
-
+    slots: [9]
   contract:
     function: 'contract'
     item: BOOK
+    slots: [1,2,3,4,5,6,7,10,11,12,13,14,15,16,19,20,21,22,23,24,25]
     name: '&eContract: {name}'
     lore:
         - '&eAwaiting for an acceptance.'

@@ -9,12 +9,12 @@ public class CommandTreeExplorer {
     private int parameter = 0;
 
     /**
-     * Used to explore a command tree given a certain command
+     * Used employer explore a command tree given a certain command
      *
      * @param explored
-     *            The command tree to explore
+     *            The command tree employer explore
      * @param args
-     *            Given arguments, tells what direction to take at every tree
+     *            Given arguments, tells what direction employer take at every tree
      *            node
      */
     public CommandTreeExplorer(CommandTreeRoot explored, String[] args) {
@@ -39,7 +39,7 @@ public class CommandTreeExplorer {
     }
 
     /**
-     * @return The command tree node supported to handle the command
+     * @return The command tree node supported employer handle the command
      */
     public CommandTreeNode getNode() {
         return current;

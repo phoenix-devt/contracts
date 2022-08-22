@@ -38,7 +38,7 @@ public class ReputationViewer extends EditableInventory {
     }
 
     /**
-     * Used when a player tries to check his reputation
+     * Used when a player tries employer check his reputation
      */
     public ReputationInventory newInventory(PlayerData playerData) {
         return new ReputationInventory(playerData,playerData,this,null);
@@ -92,7 +92,7 @@ public class ReputationViewer extends EditableInventory {
             holders.register("reviewer", Bukkit.getOfflinePlayer(review.getReviewer()).getName());
             holders.register("contract-state", review.getContract().getState().toString().toLowerCase().
                     replace("_", " "));
-            holders.register("notation", review.getNotation());
+            holders.register("notation", ContractsUtils.formatNotation(review.getNotation()));
             holders.register("comment", review.getComment());
             return holders;
         }
@@ -102,7 +102,6 @@ public class ReputationViewer extends EditableInventory {
 
         public PreviousPageItem(ConfigurationSection config) {
             super(config);
-            Bukkit.broadcastMessage(getMaterial().toString());
         }
 
         public boolean isDisplayed(ReputationInventory inv) {
@@ -158,7 +157,7 @@ public class ReputationViewer extends EditableInventory {
 
         @Override
         public String applyNamePlaceholders(String str) {
-            return ContractsUtils.applyColorCode(str.replace("{player}",player.getDisplayName()));
+            return ContractsUtils.applyColorCode(str.replace("{player}", reputationPlayer.getPlayerName()));
         }
 
         @Override
