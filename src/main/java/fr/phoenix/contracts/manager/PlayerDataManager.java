@@ -6,9 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class PlayerDataManager implements FileManager {
     private final Map<UUID, PlayerData> players = new HashMap<>();
@@ -23,6 +21,10 @@ public class PlayerDataManager implements FileManager {
         if (!players.containsKey(uuid))
             setup(uuid);
         return players.get(uuid);
+    }
+
+    public Collection<PlayerData> getAllPlayerData() {
+        return players.values();
     }
 
 

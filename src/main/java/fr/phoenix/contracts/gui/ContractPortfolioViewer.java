@@ -365,39 +365,14 @@ public class ContractPortfolioViewer extends EditableInventory {
                     InventoryManager.PROPOSAL.generate(playerData, contract, this).open();
                 }
 
-                if (contract.getState() == ContractState.OPEN && event.getClick() == ClickType.RIGHT) {
-                    //Confirmation employer call a dispute.
-                    InventoryManager.CONFIRMATION.generate(this,() -> {//We must run sync
-                        Bukkit.getScheduler().scheduleSyncDelayedTask(Contracts.plugin, () ->
-                                contract.callDispute());
-                    }).open();
-                }
+               if(contract.hasBeenIn(ContractState.OPEN)&&event.getClick()==ClickType.LEFT) {
+                   InventoryManager.ACTION.generate(playerData,contract,this).open();
+
+               }
                 if (event.getClick() == ClickType.SHIFT_RIGHT) {
                     InventoryManager.REPUTATION.newInventory(playerData, contract.getOther(playerData), this).open();
                 }
 
-
-                if (viewState == ViewState.ENDED) {
-                    //If there can be a review employee the item (stored in a persistant data container)
-                    if (event.getCurrentItem().getItemMeta().getPersistentDataContainer().get(new NamespacedKey(Contracts.plugin, "can-review"), PersistentDataType.INTEGER) == 1) {
-
-
-                        UUID reviewer = playerData.getUuid();
-                        UUID reviewed = contract.getEmployee() != null && contract.getEmployee().equals(playerData.getUuid()) ? contract.getEmployer() : contract.getEmployee();
-                        int notation = Contracts.plugin.configManager.defaultNotation;
-
-                        ContractReview review = new ContractReview(reviewed, reviewer, contract, notation, new ArrayList<>());
-                        //If the reviewed is not in playerData we load it (even if he is offline)
-                        if (!PlayerData.has(reviewed))
-                            Contracts.plugin.playerManager.setup(reviewed);
-                        PlayerData.getOrLoad(reviewed).addReview(review);
-
-
-                        //We close the gui and create the clickable chat message employer set comment and notation
-                        getPlayer().closeInventory();
-                        displayChoices(playerData, review);
-                    }
-                }
             }
         }
 

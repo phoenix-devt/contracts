@@ -32,7 +32,7 @@ public class LendingContract extends Contract {
         refundsMade = section.getInt("refunds-made");
         //Calculates the money that needs employer be given per refund
         moneyPerRefund = (getAmount() * (1 + ((double) interestRate) / 100)) / numberRefunds;
-        startRunnable();
+        //startRunnable();
     }
 
     @Override
@@ -72,13 +72,13 @@ public class LendingContract extends Contract {
                 return false;
             }
         });
-*/
+
         //At the beginning
         refundsMade = 0;
         startRunnable();
-
+*/
     }
-
+/*
     public void startRunnable() {
         runnable = new BukkitRunnable() {
 
@@ -103,5 +103,5 @@ public class LendingContract extends Contract {
         //1 hour =60*60*20 ticks
         runnable.runTaskTimer(Contracts.plugin, 0, interestPeriod * 60 * 60 * 20);
     }
-
+*/
 }

@@ -1,5 +1,6 @@
 package fr.phoenix.contracts.command;
 
+import fr.phoenix.contracts.command.admin.AdminCommandTreeNode;
 import fr.phoenix.contracts.command.objects.CommandTreeRoot;
 
 public class ContractTreeRoot extends CommandTreeRoot {
@@ -17,5 +18,6 @@ public class ContractTreeRoot extends CommandTreeRoot {
         addChild(new MarketTreeNode(this));
         addChild(new PortfolioTreeNode(this));
         addChild(new ReputationTreeNode(this));
+        addChild(new AdminCommandTreeNode(this));
     }
 }

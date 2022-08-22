@@ -2,6 +2,7 @@ package fr.phoenix.contracts.gui;
 
 import fr.phoenix.contracts.Contracts;
 import fr.phoenix.contracts.contract.Contract;
+import fr.phoenix.contracts.contract.ContractState;
 import fr.phoenix.contracts.contract.ContractType;
 import fr.phoenix.contracts.contract.Parameter;
 import fr.phoenix.contracts.gui.objects.EditableInventory;
@@ -192,7 +193,11 @@ public class ContractCreationViewer extends EditableInventory {
             if (item instanceof CreateItem) {
                 if (!contract.allParameterFilled()) {
                     Message.MISSING_CONTRACT_PARAMETER.format().send(player);
-                } else {
+                }
+                else if(Contracts.plugin.economy.getBalance(player)<contract.getAmount()){
+                    Message.NOT_ENOUGH_MONEY_CREATE.format("amount",contract.getAmount()).send(player);
+                }
+                else {
                     //Create the contract and close the inventory
                     player.getOpenInventory().close();
                     contract.createContract();

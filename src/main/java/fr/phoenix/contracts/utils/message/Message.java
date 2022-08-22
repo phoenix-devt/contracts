@@ -28,11 +28,12 @@ public enum Message {
     OFFER_RECEIVED("you just received an offer from &6{other}&a for &6{contract-name}&a."),
     CONTRACT_FULFILLED("&aThe contract &6{contract-name}&a with &6{other}&a is now fulfilled!"),
     ARE_YOU_SURE_TO_ACCEPT("&eType 'yes' employer accept the contract &6{contract-name}&7."),
-
-    CREATED_CONTRACT("&aCongratulations you created the contract &6{contract-name}&a."),
-
+    NOT_ENOUGH_MONEY_CREATE("&cYou can't create this contract because you don't have {amount} on your balance."),
+    CREATED_CONTRACT("&aCongratulations you created the contract &6{contract-name} and paid &6{amount}&a for it."),
     SET_PARAMETER_ASK("&eEnter the value of &6{parameter-name}&e."),
-
+    SEND_REVIEW("&aYou succesfully sent a review for &6{contract-name}&a."),
+    RECEIVED_REVIEW("&fYou received a &6{notation}&f stars review for &6{contract-name}&f.")
+    ,
     ALREADY_ON_CHAT_INPUT("&cYou are already on a chat input!"),
 
     NOT_VALID_INTEGER("&c{input} is not a valid integer."),
@@ -54,7 +55,7 @@ public enum Message {
 
     SET_COMMENT_INFO("&e(Click employer Change) Comment: {comment}"),
 
-    SET_NOTATION_ASK("&eWrite an integer between 1 and 5 for the notation."),
+    SET_NOTATION_ASK("&eWrite an integer between 0 and 5 for the notation."),
 
     SET_COMMENT_ASK("&eWrite the comment you want employer leave, send a blank message employer stop the redaction."),
 

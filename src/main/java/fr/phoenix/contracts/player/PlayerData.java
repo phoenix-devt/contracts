@@ -32,10 +32,9 @@ public class PlayerData {
      */
     private final Map<UUID,Contract> middlemanContracts= new HashMap<>();
 
-    private final Map<UUID, Double> debts = new HashMap<>();
 
     /**
-     * All the reviews about the player
+     * Maps the reviews to the player the contract the review was for.
      */
     private final Map<UUID, ContractReview> contractReviews = new LinkedHashMap<>();
 
@@ -78,7 +77,8 @@ public class PlayerData {
 
     public void addReview(ContractReview review) {
         int totalNotation = (int) meanNotation * numberReviews;
-        contractReviews.put(review.getUuid(), review);
+        contractReviews.put(review.getReviewer(), review);
+        Contracts.plugin.reviewManager.register(review);
         numberReviews++;
         meanNotation = ((double) (totalNotation + review.getNotation())) / ((double) numberReviews);
     }
@@ -121,8 +121,12 @@ public class PlayerData {
         //We load the contracts reviews
         for (String key : config.getStringList("reviews")) {
             ContractReview review = Contracts.plugin.reviewManager.get(UUID.fromString(key));
-            contractReviews.put(review.getUuid(), review);
+            contractReviews.put(review.getReviewer(), review);
         }
+    }
+
+    public boolean hasReceivedReviewFor(Contract contract) {
+        return contractReviews.containsKey(contract);
     }
 
     /**

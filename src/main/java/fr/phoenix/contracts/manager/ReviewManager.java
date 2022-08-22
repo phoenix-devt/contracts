@@ -25,6 +25,10 @@ public class ReviewManager implements FileManager {
         }
     }
 
+    public void register(ContractReview review) {
+        reviews.put(review.getUuid(),review);
+    }
+
     @Override
     public void save(boolean clearBefore) {
         config= new ConfigFile("review");

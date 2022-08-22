@@ -57,6 +57,7 @@ public class ContractReview {
         this.notation = notation;
     }
 
+
     public void addComment(String line) {
         comment.add(line);
     }
@@ -69,8 +70,8 @@ public class ContractReview {
         return reviewId;
     }
 
-    public OfflinePlayer getReviewed() {
-        return Bukkit.getOfflinePlayer(reviewed);
+    public UUID getReviewed() {
+        return reviewed;
     }
 
     public UUID getReviewer() {

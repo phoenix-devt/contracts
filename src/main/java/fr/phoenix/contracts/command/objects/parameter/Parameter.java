@@ -1,6 +1,8 @@
 package fr.phoenix.contracts.command.objects.parameter;
 
+import fr.phoenix.contracts.Contracts;
 import fr.phoenix.contracts.command.objects.CommandTreeExplorer;
+import fr.phoenix.contracts.player.PlayerData;
 import org.bukkit.Bukkit;
 
 import java.util.List;
@@ -14,7 +16,6 @@ public class Parameter {
             (explorer, list) -> Bukkit.getOnlinePlayers().forEach(online -> list.add(online.getName())));
     public static final Parameter PLAYER_OPTIONAL = new Parameter("(player)",
             (explorer, list) -> Bukkit.getOnlinePlayers().forEach(online -> list.add(online.getName())));
-
 
     public Parameter(String key, BiConsumer<CommandTreeExplorer, List<String>> autoComplete) {
         this.key = key;

@@ -52,6 +52,10 @@ public class MiddlemenManager {
         }
     }
 
+    public void registerMiddlemen(PlayerData playerData) {
+        middlemenList.add(playerData.getUuid());
+    }
+
 
     public void assignToRandomMiddleman(Contract contract) {
         List<PlayerData> assignableMiddlemen = middlemenList
