@@ -1,7 +1,6 @@
 package fr.phoenix.contracts;
 
 import fr.phoenix.contracts.command.ContractTreeRoot;
-import fr.phoenix.contracts.command.ReputationViewerCommand;
 import fr.phoenix.contracts.compat.Metrics;
 import fr.phoenix.contracts.compat.placeholder.DefaultPlaceholderParser;
 import fr.phoenix.contracts.compat.placeholder.PlaceholderParser;
@@ -62,18 +61,6 @@ public class Contracts extends JavaPlugin {
         InventoryManager.load();
         playerManager.load();
 
-        // Register commands
-        try {
-            final Field bukkitCommandMap = Bukkit.getServer().getClass().getDeclaredField("commandMap");
-            bukkitCommandMap.setAccessible(true);
-            CommandMap commandMap = (CommandMap) bukkitCommandMap.get(Bukkit.getServer());
-            FileConfiguration config = new ConfigFile("commands").getConfig();
-
-            commandMap.register("reputation-viewer", new ReputationViewerCommand(config.getConfigurationSection("reputation-viewer")));
-
-        } catch (Exception exception) {
-            exception.printStackTrace();
-        }
     }
 
     @Override

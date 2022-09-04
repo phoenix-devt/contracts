@@ -42,9 +42,9 @@ public class ContractReview {
 
     public void saveInConfig(FileConfiguration config) {
         config.set(reviewId + ".date", reviewDate);
-        config.set(reviewId + ".contract-id", contractId);
-        config.set(reviewId + ".reviewed", reviewed);
-        config.set(reviewId + ".reviewer", reviewer);
+        config.set(reviewId + ".contract-id", contractId.toString());
+        config.set(reviewId + ".reviewed", reviewed.toString());
+        config.set(reviewId + ".reviewer", reviewer.toString());
         config.set(reviewId + ".notation", notation);
         config.set(reviewId + ".comment", comment);
     }

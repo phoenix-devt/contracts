@@ -92,8 +92,11 @@ public class ReputationViewer extends EditableInventory {
             holders.register("reviewer", Bukkit.getOfflinePlayer(review.getReviewer()).getName());
             holders.register("contract-state", review.getContract().getState().toString().toLowerCase().
                     replace("_", " "));
+            holders.register("contract-name",review.getContract().getName());
             holders.register("notation", ContractsUtils.formatNotation(review.getNotation()));
+
             holders.register("comment", review.getComment());
+            holders.register("posted-since",ContractsUtils.formatTime(review.getReviewDate()));
             return holders;
         }
     }

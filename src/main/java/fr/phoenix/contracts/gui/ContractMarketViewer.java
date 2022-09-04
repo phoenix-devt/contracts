@@ -88,7 +88,7 @@ public class ContractMarketViewer extends EditableInventory {
         public Placeholders getPlaceholders(ContractMarketInventory inv, int n) {
             Contract contract = inv.displayedContracts.get(inv.page + n);
             Placeholders holders = contract.getContractPlaceholder(inv.getPlayerData());
-            holders.register("already-proposed",contract.hasAlreadyProposed(inv.getPlayerData()));
+            holders.register("already-proposed", ContractsUtils.formatBoolean(contract.hasAlreadyProposed(inv.getPlayerData())));
             return holders;
         }
     }
@@ -181,15 +181,21 @@ public class ContractMarketViewer extends EditableInventory {
                         Message.CANT_ACCEPT_OWN_CONTRACT.format().send(player);
                         return;
                     }
-                    if(contract.hasAlreadyProposed(playerData)) {
-                        Message.HAS_ALREADY_MADE_PROPOSAL.format("contract-name",contract.getName()).send(player);
+                    if (contract.hasAlreadyProposed(playerData)) {
+                        Message.HAS_ALREADY_MADE_PROPOSAL.format("contract-name", contract.getName()).send(player);
+                        return;
+                    }
+                    if (Contracts.plugin.economy.getBalance(player) < contract.getGuarantee()) {
+                        Message.NOT_ENOUGH_MONEY_CREATE.format("guarantee", Contracts.plugin.configManager.decimalFormat.format(contract.getGuarantee())).send(player);
                         return;
                     }
 
-                    InventoryManager.CONFIRMATION.generate(this,() ->
+                    InventoryManager.CONFIRMATION.generate(this, () ->
                     {//We must run sync
-                        Bukkit.getScheduler().scheduleSyncDelayedTask(Contracts.plugin, () ->
-                                contract.makeProposal(getPlayerData()));
+                        Bukkit.getScheduler().scheduleSyncDelayedTask(Contracts.plugin, () -> {
+                                    contract.makeProposal(getPlayerData());
+                                }
+                        );
                     }).open();
                 }
             }

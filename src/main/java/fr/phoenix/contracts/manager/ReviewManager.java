@@ -1,10 +1,12 @@
 package fr.phoenix.contracts.manager;
 
+import fr.phoenix.contracts.Contracts;
 import fr.phoenix.contracts.utils.ConfigFile;
 import fr.phoenix.contracts.contract.review.ContractReview;
 
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.logging.Level;
 
 public class ReviewManager implements FileManager {
     private final HashMap<UUID, ContractReview> reviews = new HashMap<>();
@@ -21,6 +23,7 @@ public class ReviewManager implements FileManager {
     public void load() {
         config= new ConfigFile("review");
         for (String key : config.getConfig().getKeys(false)) {
+            Contracts.log(Level.SEVERE,key+".....................................");
             reviews.put(UUID.fromString(key), new ContractReview(config.getConfig().getConfigurationSection(key)));
         }
     }

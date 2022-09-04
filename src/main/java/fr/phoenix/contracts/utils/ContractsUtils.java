@@ -9,6 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 public class ContractsUtils {
@@ -45,6 +46,20 @@ public class ContractsUtils {
 
     public static String enumName(String str) {
         return str.toUpperCase().replace("-", "_");
+    }
+
+    public static String formatBoolean(boolean b) {
+        return  (b ? ChatColor.GREEN : ChatColor.RED) + "" + b;
+    }
+
+    public static String formatList(List<String> list) {
+        String result = "";
+        for (String str : list)
+            result += "\n" + str;
+
+        if (result != "")
+            result = result.substring(1);
+        return result;
     }
 
 

@@ -68,7 +68,8 @@ public class PlayerData {
     }
 
     public boolean canLeaveReview(Contract contract) {
-        return (contract.hasBeenIn(ContractState.RESOLVED) && (System.currentTimeMillis() - contract.getEnteringTime(ContractState.RESOLVED)) < Contracts.plugin.configManager.reviewPeriod);
+        PlayerData other=contract.getOther(this);
+        return (contract.hasBeenIn(ContractState.RESOLVED) && !other.hasReceivedReviewFor(contract)&&(System.currentTimeMillis() - contract.getEnteringTime(ContractState.RESOLVED)) < Contracts.plugin.configManager.reviewPeriod*1000*3600*24);
     }
 
     public void addContract(Contract contract) {
@@ -126,7 +127,7 @@ public class PlayerData {
     }
 
     public boolean hasReceivedReviewFor(Contract contract) {
-        return contractReviews.containsKey(contract);
+        return contractReviews.containsKey(contract.getId());
     }
 
     /**
@@ -200,7 +201,7 @@ public class PlayerData {
 
     public void saveInConfig(FileConfiguration config) {
         //Set the reviews
-        List<String> reviews = contractReviews.keySet().stream().map(UUID::toString).collect(Collectors.toList());
+        List<String> reviews = contractReviews.values().stream().map(contractReview -> contractReview.getUuid().toString()).collect(Collectors.toList());
         config.set("reviews", reviews);
 
         //Set the contracts

@@ -1,7 +1,6 @@
 package fr.phoenix.contracts.gui;
 
 import fr.phoenix.contracts.Contracts;
-import fr.phoenix.contracts.command.ReputationViewerCommand;
 import fr.phoenix.contracts.contract.Contract;
 import fr.phoenix.contracts.contract.ContractState;
 import fr.phoenix.contracts.gui.objects.EditableInventory;
@@ -11,12 +10,7 @@ import fr.phoenix.contracts.gui.objects.item.Placeholders;
 import fr.phoenix.contracts.gui.objects.item.SimpleItem;
 import fr.phoenix.contracts.manager.InventoryManager;
 import fr.phoenix.contracts.player.PlayerData;
-import fr.phoenix.contracts.contract.review.ContractReview;
 import fr.phoenix.contracts.utils.ContractsUtils;
-import fr.phoenix.contracts.utils.message.Message;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
@@ -30,7 +24,6 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.*;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 public class ContractPortfolioViewer extends EditableInventory {
 
@@ -72,19 +65,15 @@ public class ContractPortfolioViewer extends EditableInventory {
 
         @Override
         public ItemStack getDisplayedItem(ContractPortfolioInventory inv, int n) {
-            ViewState viewState = inv.otherViewStates.get(n);
+            ViewState viewState = inv.viewStates.get(n);
             Material displayMaterial = Material.AIR;
             try {
-                displayMaterial = Objects.requireNonNull(Material.valueOf(ContractsUtils.enumName(config.getString("material" + (n + 1)))));
+                displayMaterial = Objects.requireNonNull(Material.valueOf(ContractsUtils.enumName(config.getString(ContractsUtils.ymlName(viewState.toString())))));
             } catch (Exception e) {
-                Contracts.plugin.getLogger().log(Level.WARNING, "Couldn't load material" + (n + 1) + ":" + config.getString("material" + (n + 1)) + " for the change view item of the contracts gui");
+                Contracts.plugin.getLogger().log(Level.WARNING, "Couldn't load material for" + viewState.toString() +" in the change view item of the contracts gui");
             }
 
             ItemStack item = super.getDisplayedItem(inv, n, displayMaterial);
-            ItemMeta meta = item.getItemMeta();
-            PersistentDataContainer container = meta.getPersistentDataContainer();
-            container.set(new NamespacedKey(Contracts.plugin, "view-state"), PersistentDataType.STRING, viewState.toString());
-            item.setItemMeta(meta);
             return item;
         }
 
@@ -92,7 +81,7 @@ public class ContractPortfolioViewer extends EditableInventory {
         @Override
         public Placeholders getPlaceholders(ContractPortfolioInventory inv, int n) {
             Placeholders holders = new Placeholders();
-            holders.register("view-state", ContractsUtils.chatName(inv.otherViewStates.get(n).toString()));
+            holders.register("view-state", ContractsUtils.chatName(inv.viewStates.get(n).toString()));
             return holders;
         }
     }
@@ -315,7 +304,7 @@ public class ContractPortfolioViewer extends EditableInventory {
     public class ContractPortfolioInventory extends GeneratedInventory {
         //The type of contracts displayed in the GUI
         private ViewState viewState = ViewState.WAITING_ACCEPTANCE;
-        private List<ViewState> otherViewStates = Arrays.stream(ViewState.values()).filter(viewState1 -> viewState1 != viewState).collect(Collectors.toList());
+        private List<ViewState> viewStates = Arrays.asList(ViewState.WAITING_ACCEPTANCE,ViewState.OPEN,ViewState.DISPUTED,ViewState.ENDED);
         private List<Contract> displayedContracts = playerData.getContracts(viewState.corresponding);
         private int page = 0;
         private final int contractsPerPage = getEditable().getByFunction("contract").getSlots().size();
@@ -327,7 +316,6 @@ public class ContractPortfolioViewer extends EditableInventory {
 
         public void changeState(ViewState viewState) {
             this.viewState = viewState;
-            otherViewStates = Arrays.stream(ViewState.values()).filter(viewState1 -> viewState1 != viewState).collect(Collectors.toList());
             displayedContracts = playerData.getContracts(viewState.corresponding);
             maxPage = Math.max(0, displayedContracts.size() - 1) / contractsPerPage;
         }
@@ -348,8 +336,12 @@ public class ContractPortfolioViewer extends EditableInventory {
                 open();
             }
             if (item instanceof ChangeViewItem) {
-                ViewState newView = ViewState.valueOf(event.getCurrentItem().getItemMeta().getPersistentDataContainer().
-                        get(new NamespacedKey(Contracts.plugin, "view-state"), PersistentDataType.STRING));
+                int n=0;
+                for(int i=0;i<item.getSlots().size();i++) {
+                    if(item.getSlots().get(i).equals(event.getSlot()))
+                        n=i;
+                }
+                ViewState newView = viewStates.get(n);
                 changeState(newView);
                 open();
             }
@@ -383,25 +375,5 @@ public class ContractPortfolioViewer extends EditableInventory {
         }
     }
 
-
-    /**
-     * Sends a clickable message employer the player corresponding employer the review he wants employer post.
-     */
-    public static void displayChoices(PlayerData playerData, ContractReview review) {
-        TextComponent textComponent = new TextComponent(Message.SET_NOTATION_INFO.format("notation", "" + review.getNotation()).getAsString());
-        textComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/review " + ReputationViewerCommand.NOTATION_ASK + " " + review.getUuid().toString()));
-        playerData.getPlayer().spigot().sendMessage(textComponent);
-
-
-        StringBuilder comment = new StringBuilder();
-        for (String str : review.getComment()) {
-            comment.append("\n");
-            comment.append(str);
-        }
-        textComponent = new TextComponent(Message.SET_NOTATION_INFO.format("comment", "" + comment.toString()).getAsString());
-        textComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/review " + ReputationViewerCommand.COMMENT_ASK + " " + review.getUuid().toString()));
-        playerData.getPlayer().spigot().sendMessage(textComponent);
-
-    }
 
 }

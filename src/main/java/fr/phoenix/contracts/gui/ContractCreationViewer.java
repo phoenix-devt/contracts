@@ -112,13 +112,7 @@ public class ContractCreationViewer extends EditableInventory {
         public Placeholders getPlaceholders(ContractCreationInventory inv, int n) {
             Placeholders holders = new Placeholders();
             holders.register("id", ContractsUtils.chatName(inv.parametersList.get(n).getId()));
-            String result = "";
-            for (String str : inv.parametersList.get(n).getDescription())
-                result += "\n" + str;
-
-            if (result != "")
-                result = result.substring(1);
-            holders.register("description", result);
+            holders.register("description", ContractsUtils.formatList(inv.contract.getDescription()));
             return holders;
         }
     }

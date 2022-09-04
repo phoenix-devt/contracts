@@ -10,6 +10,7 @@ import fr.phoenix.contracts.utils.ContractsUtils;
 import fr.phoenix.contracts.utils.message.Message;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -100,11 +101,6 @@ public abstract class Contract {
             }
         }, () -> amount <= 0));
     }
-
-    public void setupParameters() {
-
-    }
-
 
     public Contract(ContractType type, ConfigurationSection section) {
         this.type = type;
@@ -292,13 +288,6 @@ public abstract class Contract {
         return employer;
     }
 
-    public boolean canBeReviewed() {
-        if (hasBeenIn(ContractState.FULFILLED)) {
-            return (getEnteringTime(ContractState.FULFILLED) - System.currentTimeMillis()) / 1000 * 3600 * 24 < Contracts.plugin.configManager.reviewPeriod;
-        } else {
-            return state == ContractState.RESOLVED && (getEnteringTime(ContractState.RESOLVED) - System.currentTimeMillis()) / 1000 * 3600 * 24 < Contracts.plugin.configManager.reviewPeriod;
-        }
-    }
 
 
     /**
@@ -373,7 +362,7 @@ public abstract class Contract {
         if (employee != null)
             config.set(str + ".employee", employee.toString());
         config.set(str + ".employer", employer.toString());
-        config.set(str + ".amount", "" + getAmount());
+        config.set(str + ".amount", amount);
         config.set(str + ".contract-state", ContractsUtils.ymlName(state.toString()));
         config.set(str + ".deadline", deadLine);
         config.set(str + ".description", description);
@@ -485,12 +474,12 @@ public abstract class Contract {
         lastOfferProvider = getContractParty(playerData);
         lastOffer = value;
         boolean isEmployee = isEmployee(playerData);
-        OfflinePlayer employeePlayer = Bukkit.getOfflinePlayer(employee);
-        OfflinePlayer employerPlayer = Bukkit.getOfflinePlayer(employer);
-        if (employeePlayer != null)
-            Message.OFFER_CREATED.format("other", isEmployee ? employerPlayer.getName() : employeePlayer.getName(), "contract-name", getName()).send(employeePlayer.getPlayer());
-        if (employerPlayer != null)
-            Message.OFFER_RECEIVED.format("other", isEmployee ? employerPlayer.getName() : employeePlayer.getName(), "contract-name", getName()).send(employerPlayer.getPlayer());
+        PlayerData other =getOther(playerData);
+
+
+            Message.OFFER_CREATED.format("other",other.getPlayerName(), "contract-name", getName()).send(playerData.getPlayer());
+        if (other.getPlayer() != null)
+            Message.OFFER_RECEIVED.format("other", playerData.getPlayerName(), "contract-name", getName()).send(other.getPlayer());
     }
 
     public void whenOfferAccepted() {
@@ -501,9 +490,9 @@ public abstract class Contract {
         Contracts.plugin.economy.depositPlayer(Bukkit.getOfflinePlayer(employee), lastOffer + guarantee);
         Contracts.plugin.economy.depositPlayer(Bukkit.getOfflinePlayer(employer), amount - lastOffer);
         if (employeePlayer != null)
-            Message.EMPLOYEE_CONTRACT_ENDED.format("employer", Bukkit.getOfflinePlayer(employer).getName(), "contract-name", getName(), "amount", amount, "guarantee", guarantee).send(employeePlayer);
+            Message.EMPLOYEE_OFFERED_ACCEPTED.format("employer", Bukkit.getOfflinePlayer(employer).getName(), "contract-name", getName(), "amount", amount, "guarantee", guarantee).send(employeePlayer);
         if (employerPlayer != null)
-            Message.EMPLOYER_CONTRACT_ENDED.format("employee", Bukkit.getOfflinePlayer(employee).getName(), "contract-name", getName(), "amount", amount).send(employerPlayer);
+            Message.EMPLOYER_OFFERED_ACCEPTED.format("employee", Bukkit.getOfflinePlayer(employee).getName(), "contract-name", getName(), "amount", amount).send(employerPlayer);
 
     }
 
@@ -566,35 +555,32 @@ public abstract class Contract {
             return;
         }
         proposals.add(new Proposal(this, proposingPlayer, PlayerData.getOrLoad(employer), System.currentTimeMillis()));
-    Player employerPlayer=PlayerData.getOrLoad(employer).getPlayer();
-    if(employerPlayer!=null)
-        Message.OFFER_RECEIVED.format("other",proposingPlayer.getPlayerName(),"contract-name",getName()).send(employerPlayer);
-    Message.OFFER_CREATED.format("other",PlayerData.getOrLoad(employer).getPlayerName(),
-            "contract-name",getName(),"guarantee",guarantee).send(proposingPlayer.getPlayer());
-    }
 
+        Contracts.plugin.economy.withdrawPlayer(proposingPlayer.getPlayer(), guarantee);
+        Player employerPlayer = PlayerData.getOrLoad(employer).getPlayer();
+        if (employerPlayer != null)
+            Message.PROPOSAL_RECEIVED.format("other", proposingPlayer.getPlayerName(), "contract-name", getName()).send(employerPlayer);
+        Message.PROPOSAL_CREATED.format("contract-name", getName(), "guarantee", guarantee).send(proposingPlayer.getPlayer());
+    }
 
 
     public Placeholders getContractPlaceholder(PlayerData playerData) {
         Placeholders holders = new Placeholders();
         holders.register("name", getName());
-        String result = "";
-        for (String str : getDescription())
-            result += "\n" + str;
-
-        if (result != "")
-            result = result.substring(1);
-        holders.register("description", result);
+        holders.register("description", ContractsUtils.formatList(getDescription()));
         holders.register("state", getState().toString());
         holders.register("type", ContractsUtils.chatName(getType().toString()));
         holders.register("employee", getEmployee() != null ? getEmployeeName() : "");
         holders.register("employer", getEmployerName());
+
         if (hasBeenIn(ContractState.MIDDLEMAN_DISPUTED)) {
             holders.register("middleman", getMiddleman() != null ? getMiddlemanName() : "");
             holders.register("middleman-dispute-caller", middlemanDisputeCaller.getOfflinePlayer(this).getName());
         }
-        if (state == ContractState.OPEN)
-            holders.register("received-offer", lastOfferProvider != null && getContractParty(playerData) != lastOfferProvider);
+        if (state == ContractState.OPEN) {
+            boolean receivedOffer = lastOfferProvider != null && getContractParty(playerData) != lastOfferProvider;
+            holders.register("received-offer", ContractsUtils.formatBoolean(receivedOffer));
+        }
         if (state == ContractState.WAITING_ACCEPTANCE)
             holders.register("proposals", getProposals().size());
 
@@ -606,10 +592,14 @@ public abstract class Contract {
         holders.register("deadline", Contracts.plugin.configManager.decimalFormat.format(getDeadLine()));
         PlayerData other = getOther(playerData);
         if (other != null) {
-            holders.register("has-made-review", other.hasReceivedReviewFor(this));
+            holders.register("has-been-reviewed", ContractsUtils.formatBoolean(other.hasReceivedReviewFor(this)));
+            holders.register("can-be-reviewed", ContractsUtils.formatBoolean(playerData.canLeaveReview(this)));
             holders.register("other", other.getPlayerName());
             holders.register("other-reputation", ContractsUtils.formatNotation(employer.getMeanNotation()));
             holders.register("other-total-reviews", other.getNumberReviews());
+            holders.register("last-offer", getLastOfferProvider() != null ? getLastOffer() : "None");
+            holders.register("last-offer-player", getLastOfferProvider() != null ?
+                    getLastOfferProvider().getUUID(this).equals(playerData.getUuid()) ? "You" : getLastOfferProvider().getOfflinePlayer(this).getName() : other.getPlayerName());
         }
         for (ContractState state : ContractState.values()) {
             holders.register(ContractsUtils.ymlName(state.toString()) + "-since",
