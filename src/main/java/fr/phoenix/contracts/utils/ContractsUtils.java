@@ -73,6 +73,7 @@ public class ContractsUtils {
 
     public static String chatName(String str) {
         StringBuilder result = new StringBuilder();
+        str=str.replace("_"," _").replace("-", " -");
         Arrays.stream(str.split("_")).forEach(intermediary -> Arrays.stream(intermediary.split("-")).forEach(word -> result.append(word.substring(0, 1).toUpperCase()).append(word.substring(1).toLowerCase())));
         return result.toString();
     }

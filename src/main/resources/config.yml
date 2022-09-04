@@ -1,9 +1,23 @@
+decimal-format: '0.##'
 
 #The caracter used for color code
 color-code-char: '&'
 
 #The period in days where you can give a review after the a contract ended.
 review-period: 5
+
+#The period in days where you can call a dispute.
+#At the end of this period the contract will be marked as resolved and the parties won't be able to call disputes.
+call-dispute-period: 3
+
+#The period of the timer that checks if the call-dispute period has been exceeded.
+#In hours
+check-if-resolved-period: 1
+
+
+#The commission in % that the middleman will take for every contract he treats.
+contract-commission: 10
+
 
 #The number of characters and lines the player can give in a comment.
 max-comment-lines: 4

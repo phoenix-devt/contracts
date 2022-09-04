@@ -18,13 +18,14 @@ public class InventoryManager {
     public static final ContractCreationViewer CONTRACT_CREATION = new ContractCreationViewer();
     public static final ContractMarketViewer CONTRACT_MARKET = new ContractMarketViewer();
     public static final ContractPortfolioViewer CONTRACT_PORTFOLIO = new ContractPortfolioViewer();
+    public static final ContractMiddlemanViewer CONTRACT_MIDDLEMAN= new ContractMiddlemanViewer();
     public static final ContractTypeViewer CONTRACT_TYPE = new ContractTypeViewer();
     public static final ConfirmationViewer CONFIRMATION = new ConfirmationViewer();
     public static final ProposalViewer PROPOSAL = new ProposalViewer();
     public static final ReputationViewer REPUTATION = new ReputationViewer();
     public static ActionViewer ACTION = new ActionViewer();
     public static List<EditableInventory> list = Arrays.asList(ACTION,PROPOSAL
-            , CONFIRMATION, REPUTATION, CONTRACT_TYPE, CONTRACT_PORTFOLIO, CONTRACT_MARKET, CONTRACT_CREATION);
+            , CONFIRMATION, REPUTATION, CONTRACT_TYPE, CONTRACT_PORTFOLIO, CONTRACT_MARKET, CONTRACT_CREATION,CONTRACT_MIDDLEMAN);
 
 
     public static void load() {

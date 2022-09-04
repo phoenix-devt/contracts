@@ -13,11 +13,10 @@ import fr.phoenix.contracts.player.PlayerData;
 import fr.phoenix.contracts.utils.ChatInput;
 import fr.phoenix.contracts.utils.ContractsUtils;
 import fr.phoenix.contracts.utils.message.Message;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
@@ -46,7 +45,7 @@ public class ContractMiddlemanViewer extends EditableInventory {
             return new PreviousPageItem(config);
         if (function.equals("go-back"))
             return new GoBackItem(config);
-        if (function.equals("change-view"))
+        if (function.equals("change-state"))
             return new ChangeStateItem(config);
         if (function.equals("contract"))
             return new ContractItem(config);
@@ -54,14 +53,8 @@ public class ContractMiddlemanViewer extends EditableInventory {
         return null;
     }
 
-    /**
-     * @param ownContracts if it shows the contracts of the middle men or a list of all the different contracts
-     *                     waiting for a middle man.
-     * @return
-     */
-    public ContractMiddlemanInventory newInventory(PlayerData playerData, boolean ownContracts) {
-
-        return new ContractMiddlemanInventory(playerData, this, ownContracts);
+    public ContractMiddlemanInventory generate(PlayerData playerData) {
+        return new ContractMiddlemanInventory(playerData, this);
     }
 
     public class ChangeStateItem extends InventoryItem<ContractMiddlemanInventory> {
@@ -79,18 +72,18 @@ public class ContractMiddlemanViewer extends EditableInventory {
 
         @Override
         public ItemStack getDisplayedItem(ContractMiddlemanInventory inv, int n) {
-            ContractState viewState = inv.otherContractViews.get(n);
+            ContractState contractState = inv.otherContractStates.get(n);
             Material displayMaterial = Material.AIR;
             try {
                 displayMaterial = Objects.requireNonNull(Material.valueOf(ContractsUtils.enumName(config.getString("material" + (n + 1)))));
             } catch (Exception e) {
-                Contracts.plugin.getLogger().log(Level.WARNING, "Couldn't load material" + (n + 1) + ":" + config.getString("material" + (n + 1)) + " for the change view item of the contracts gui");
+                Contracts.plugin.getLogger().log(Level.WARNING, "Couldn't load material" + (n + 1) + ":" + config.getString("material" + (n + 1)) + " for the change state item of the contracts gui");
             }
 
             ItemStack item = super.getDisplayedItem(inv, n, displayMaterial);
             ItemMeta meta = item.getItemMeta();
             PersistentDataContainer container = meta.getPersistentDataContainer();
-            container.set(new NamespacedKey(Contracts.plugin, "view-state"), PersistentDataType.STRING, viewState.toString());
+            container.set(new NamespacedKey(Contracts.plugin, "contract-state"), PersistentDataType.STRING, contractState.toString());
             item.setItemMeta(meta);
             return item;
         }
@@ -99,12 +92,14 @@ public class ContractMiddlemanViewer extends EditableInventory {
         @Override
         public Placeholders getPlaceholders(ContractMiddlemanInventory inv, int n) {
             Placeholders holders = new Placeholders();
-            holders.register("view-state", ContractsUtils.chatName(inv.otherContractViews.get(n).toString()));
+            holders.register("contract-state", ContractsUtils.chatName(inv.otherContractStates.get(n).toString()));
             return holders;
         }
     }
 
     public class ContractItem extends InventoryItem<ContractMiddlemanInventory> {
+        private double amount;
+
 
         public ContractItem(ConfigurationSection config) {
             super(config);
@@ -129,6 +124,13 @@ public class ContractMiddlemanViewer extends EditableInventory {
             return item;
         }
 
+        public double getAmount() {
+            return amount;
+        }
+
+        public void setAmount(double amount) {
+            this.amount = amount;
+        }
 
         @Override
         public Placeholders getPlaceholders(ContractMiddlemanInventory inv, int n) {
@@ -136,6 +138,94 @@ public class ContractMiddlemanViewer extends EditableInventory {
             return contract.getContractPlaceholder(inv.getPlayerData());
         }
     }
+
+    public class AdminDisputedContractItem extends InventoryItem<ContractMiddlemanInventory> {
+
+        public AdminDisputedContractItem(ContractPortfolioViewer.ContractItem parent, ConfigurationSection config, Material material) {
+            super(parent, config, material);
+        }
+
+        @Override
+        public Placeholders getPlaceholders(ContractMiddlemanInventory inv, int n) {
+            return parent.getPlaceholders(inv, n);
+        }
+    }
+
+    public class ResolvedContractItem extends InventoryItem<ContractMiddlemanInventory> {
+
+        public ResolvedContractItem(ContractPortfolioViewer.ContractItem parent, ConfigurationSection config, Material material) {
+            super(parent, config, material);
+        }
+
+        @Override
+        public Placeholders getPlaceholders(ContractMiddlemanInventory inv, int n) {
+            return parent.getPlaceholders(inv, n);
+        }
+    }
+
+
+
+    public class MiddlemanDisputedContractItem extends InventoryItem<ContractMiddlemanInventory> {
+
+        public MiddlemanDisputedContractItem(ContractItem parent, ConfigurationSection config, Material material) {
+            super(parent, config, material);
+        }
+
+        @Override
+        public ItemStack getDisplayedItem(ContractMiddlemanInventory inv, int n) {
+            ItemStack item = super.getDisplayedItem(inv, n);
+            Contract contract = inv.displayedContracts.get(inv.page + n);
+
+            //For a ended contract item: 2 containers, if it can be reviewed and the uuid of the contract
+            ItemMeta itemMeta = item.getItemMeta();
+            PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
+            container.set(new NamespacedKey(Contracts.plugin, "can-review"), PersistentDataType.INTEGER,
+                    inv.getPlayerData().canLeaveReview(contract) ? 1 : 0);
+            item.setItemMeta(itemMeta);
+            return item;
+        }
+
+        @Override
+        public Placeholders getPlaceholders(ContractMiddlemanInventory inv, int n) {
+            Placeholders holders = parent.getPlaceholders(inv, n);
+            Contract contract = inv.displayedContracts.get(inv.page + n);
+            holders.register("can-review", inv.getPlayerData().canLeaveReview(contract));
+            return holders;
+        }
+    }
+
+    public class MiddlemanResolvedContractItem extends InventoryItem<ContractMiddlemanInventory> {
+
+        public MiddlemanResolvedContractItem(ContractPortfolioViewer.ContractItem parent, ConfigurationSection config, Material material) {
+            super(parent, config, material);
+        }
+
+        @Override
+        public ItemStack getDisplayedItem(ContractMiddlemanInventory inv, int n) {
+            ItemStack item = super.getDisplayedItem(inv, n);
+            Contract contract = inv.displayedContracts.get(inv.page + n);
+
+            //For a ended contract item: 2 containers, if it can be reviewed and the uuid of the contract
+            ItemMeta itemMeta = item.getItemMeta();
+            PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
+            container.set(new NamespacedKey(Contracts.plugin, "can-review"), PersistentDataType.INTEGER,
+                    inv.getPlayerData().canLeaveReview(contract) ? 1 : 0);
+            item.setItemMeta(itemMeta);
+            return item;
+        }
+
+        @Override
+        public Placeholders getPlaceholders(ContractMiddlemanInventory inv, int n) {
+            Placeholders holders = parent.getPlaceholders(inv, n);
+            Contract contract = inv.displayedContracts.get(inv.page + n);
+            holders.register("can-review", inv.getPlayerData().canLeaveReview(contract));
+            return holders;
+        }
+    }
+    
+    
+    
+    
 
     public class GoBackItem extends SimpleItem<ContractMiddlemanInventory> {
 
@@ -172,17 +262,15 @@ public class ContractMiddlemanViewer extends EditableInventory {
     public class ContractMiddlemanInventory extends GeneratedInventory {
         private int page = 0;
         private final int contractsPerPage;
-        private  List<Contract> displayedContracts;
+        private List<Contract> displayedContracts;
         private int maxPage;
-        private final List<ContractState> allViewedContractStates=Arrays.asList(ContractState.MIDDLEMAN_DISPUTED,ContractState.ADMIN_DISPUTED,ContractState.RESOLVED);
-        private ContractState contractState=ContractState.ADMIN_DISPUTED;
-        private List<ContractState> otherContractViews=Arrays.asList(ContractState.MIDDLEMAN_DISPUTED,ContractState.RESOLVED);
+        private final List<ContractState> allViewedContractStates = Arrays.asList(ContractState.MIDDLEMAN_DISPUTED, ContractState.ADMIN_DISPUTED, ContractState.RESOLVED);
+        private ContractState contractState = ContractState.MIDDLEMAN_DISPUTED;
+        private List<ContractState> otherContractStates = Arrays.asList(ContractState.MIDDLEMAN_RESOLVED, ContractState.ADMIN_DISPUTED, ContractState.RESOLVED);
 
-        public ContractMiddlemanInventory(PlayerData playerData, EditableInventory editable, boolean ownContracts) {
+        public ContractMiddlemanInventory(PlayerData playerData, EditableInventory editable) {
             super(playerData, editable);
-            displayedContracts = Contracts.plugin.contractManager.getContractsOfState(ContractState.OPEN /* TODO */).stream()
-                    .filter(contract -> contract.getState() == ContractState.WAITING_ACCEPTANCE)
-                    .sorted((contract1, contract2) -> (int) (contract1.getEnteringTime(ContractState.WAITING_ACCEPTANCE) - contract2.getEnteringTime(ContractState.WAITING_ACCEPTANCE))).collect(Collectors.toList());
+            displayedContracts = playerData.getMiddlemanContracts(contractState);
             contractsPerPage = getEditable().getByFunction("contract").getSlots().size();
 
             maxPage = Math.max(0, displayedContracts.size() - 1) / contractsPerPage;
@@ -195,8 +283,8 @@ public class ContractMiddlemanViewer extends EditableInventory {
         }
 
         public void changeState(ContractState contractState) {
-            this.contractState= contractState;
-            otherContractViews= allViewedContractStates.stream().filter(contractView1 -> contractView1 != contractState).collect(Collectors.toList());
+            this.contractState = contractState;
+            otherContractStates = allViewedContractStates.stream().filter(contractView1 -> contractView1 != contractState).collect(Collectors.toList());
             displayedContracts = playerData.getMiddlemanContracts(contractState);
             maxPage = Math.max(0, displayedContracts.size() - 1) / contractsPerPage;
         }
@@ -216,17 +304,53 @@ public class ContractMiddlemanViewer extends EditableInventory {
             }
             if (item instanceof ChangeStateItem) {
                 ContractState newView = ContractState.valueOf(event.getCurrentItem().getItemMeta().getPersistentDataContainer().
-                        get(new NamespacedKey(Contracts.plugin, "contract-view"), PersistentDataType.STRING));
+                        get(new NamespacedKey(Contracts.plugin, "contract-state"), PersistentDataType.STRING));
                 changeState(newView);
                 open();
             }
-            //TODO
-            if (item instanceof ContractItem) {
+
+            if (item instanceof ContractItem contractItem) {
                 Contract contract = Contracts.plugin.contractManager.get(UUID.fromString(Objects.requireNonNull(event.getCurrentItem().getItemMeta().getPersistentDataContainer()
                         .get(new NamespacedKey(Contracts.plugin, "contract"), PersistentDataType.STRING))));
-                //If left click, shows the reputation of the player
-                if (event.getAction().equals(InventoryAction.PICKUP_HALF)) {
+
+                if (event.getClick() == ClickType.SHIFT_LEFT) {
                     InventoryManager.REPUTATION.newInventory(playerData, PlayerData.getOrLoad(contract.getEmployer()), this).open();
+                    return;
+                }
+
+                if (event.getClick() == ClickType.SHIFT_RIGHT) {
+                    InventoryManager.REPUTATION.newInventory(playerData, PlayerData.getOrLoad(contract.getEmployee()), this).open();
+                    return;
+                }
+
+                if (event.getClick() == ClickType.RIGHT) {
+                    //If the player is already on chat input we block the access employer a new chat input.
+                    if (playerData.isOnChatInput()) {
+                        Message.ALREADY_ON_CHAT_INPUT.format().send(playerData.getPlayer());
+                        return;
+                    }
+                    double max = contract.getAmount();
+                    double min = -contract.getGuarantee();
+                    Message.RESOLVE_DISPUTE_ASK.format("max", max, "min", min).send(playerData.getPlayer());
+                    new ChatInput(playerData, this, (p, val) -> {
+                        try {
+                            double amount = Double.parseDouble(val);
+                            if (amount < min || amount > max) {
+                                Message.NOT_IN_LIMIT.format("amount", amount, "max", max, "min", min);
+                                return false;
+                            }
+                            contractItem.setAmount(amount);
+
+                        } catch (NumberFormatException e) {
+                            Message.NOT_VALID_DOUBLE.format().send(player);
+                            return false;
+                        }
+                        return true;
+                    });
+                }
+
+                if (event.getClick() == ClickType.LEFT) {
+                    InventoryManager.CONFIRMATION.generate(this, () -> contract.whenDecidedByMiddleman(contractItem.amount)).open();
                 }
             }
 

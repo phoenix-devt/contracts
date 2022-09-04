@@ -1,14 +1,14 @@
-package fr.phoenix.contracts.command.admin.middleman;
+package fr.phoenix.contracts.command.middleman;
 
 import fr.phoenix.contracts.command.objects.CommandTreeNode;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class MiddlemanTreeNode extends CommandTreeNode {
+public class MiddlemanTreeNode  extends CommandTreeNode {
 
     public MiddlemanTreeNode(CommandTreeNode parent) {
         super(parent, "middleman");
-        addChild(new AddTreeNode(this));
-        addChild(new RemoveTreeNode(this));
+        addChild(new MiddlemanPortfolioTreeNode(this));
     }
 
     @Override

@@ -369,7 +369,7 @@ public class ContractPortfolioViewer extends EditableInventory {
                    InventoryManager.ACTION.generate(playerData,contract,this).open();
 
                }
-                if (event.getClick() == ClickType.SHIFT_RIGHT) {
+                if (event.getClick() == ClickType.SHIFT_RIGHT&&contract.getState()!=ContractState.WAITING_ACCEPTANCE) {
                     InventoryManager.REPUTATION.newInventory(playerData, contract.getOther(playerData), this).open();
                 }
 

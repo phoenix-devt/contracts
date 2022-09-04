@@ -6,6 +6,7 @@ import fr.phoenix.contracts.contract.ContractState;
 import fr.phoenix.contracts.contract.ContractType;
 import fr.phoenix.contracts.utils.ConfigFile;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +18,10 @@ import java.util.stream.Collectors;
 public class ContractManager implements FileManager {
     private final Map<UUID, Contract> contracts = new HashMap<>();
 
+    public ContractManager() {
+    }
+
+
     public List<Contract> getContractsOfType(ContractType type) {
         return contracts.values().stream().filter(contract -> type == contract.getType()).collect(Collectors.toList());
     }
@@ -24,6 +29,7 @@ public class ContractManager implements FileManager {
     public List<Contract> getContractsOfState(ContractState state) {
         return contracts.values().stream().filter(contract -> contract.getState() == state).collect(Collectors.toList());
     }
+
 
     public void registerContract(Contract contract) {
         contracts.put(contract.getId(), contract);
@@ -43,6 +49,21 @@ public class ContractManager implements FileManager {
             } catch (RuntimeException exception) {
                 Contracts.plugin.getLogger().log(Level.WARNING, "Could not load contract '" + key + "': " + exception.getMessage());
             }
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                contracts.values().stream()
+                        .filter(contract -> contract.getState() == ContractState.FULFILLED || contract.getState() == ContractState.MIDDLEMAN_RESOLVED)
+                        .filter(contract -> (contract.getEnteringTime(contract.getState()) - System.currentTimeMillis()) < 1000 * 3600 * 24)
+                        .forEach(contract -> {
+                            if (contract.getState() == ContractState.FULFILLED)
+                                contract.whenResolved();
+                            else
+                                contract.whenResolvedFromDispute();
+                        });
+            }
+        }.runTaskTimer(Contracts.plugin, 0L, Contracts.plugin.configManager.checkIfResolvedPeriod * 1000 * 3600);
     }
 
     @Override

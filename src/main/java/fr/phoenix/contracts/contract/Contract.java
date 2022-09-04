@@ -29,8 +29,10 @@ public abstract class Contract {
     protected UUID middleman;
     protected ContractParties middlemanDisputeCaller;
     protected ContractParties adminDisputeCaller;
-
-
+    /**
+     * The amount of money the employer will have to give according to the middleman decision.
+     */
+    protected double middlemanAmount;
     protected double amount;
     /**
      * The amount of money you can lose/gain when a dispute is resolved.
@@ -74,7 +76,7 @@ public abstract class Contract {
             description.add(str);
         }, () -> false));
 
-        addParameter(new Parameter("deadline", "The number of days the contract to be fulfilled before.", () -> Arrays.asList("" + deadLine), (p, str) -> {
+        addParameter(new Parameter("deadline", "The number of days by which the contract needs to be fulfilled.", () -> Arrays.asList("" + deadLine), (p, str) -> {
             try {
                 deadLine = Integer.parseInt(str);
             } catch (Exception e) {
@@ -213,6 +215,10 @@ public abstract class Contract {
     }
 
 
+    public double getMiddlemanAmount() {
+        return middlemanAmount;
+    }
+
     /**
      * @return The list of all the parameters in the order of insertion.
      */
@@ -287,12 +293,10 @@ public abstract class Contract {
     }
 
     public boolean canBeReviewed() {
-        if(hasBeenIn(ContractState.FULFILLED)) {
-            return  (getEnteringTime(ContractState.FULFILLED) - System.currentTimeMillis()) / 1000 * 3600 * 24 < Contracts.plugin.configManager.reviewPeriod;
-        }
-        else
-        {
-            return state==ContractState.RESOLVED&&(getEnteringTime(ContractState.RESOLVED) - System.currentTimeMillis()) / 1000 * 3600 * 24 < Contracts.plugin.configManager.reviewPeriod;
+        if (hasBeenIn(ContractState.FULFILLED)) {
+            return (getEnteringTime(ContractState.FULFILLED) - System.currentTimeMillis()) / 1000 * 3600 * 24 < Contracts.plugin.configManager.reviewPeriod;
+        } else {
+            return state == ContractState.RESOLVED && (getEnteringTime(ContractState.RESOLVED) - System.currentTimeMillis()) / 1000 * 3600 * 24 < Contracts.plugin.configManager.reviewPeriod;
         }
     }
 
@@ -391,11 +395,14 @@ public abstract class Contract {
         Player employeePlayer = Bukkit.getPlayer(employee);
         Player employerPlayer = Bukkit.getPlayer(employer);
         if (employeePlayer != null)
-            Message.CONTRACT_DISPUTED.format("contract-name", name, "who", employee.equals(middlemanDisputeCaller) ? "You" : employerPlayer.getName())
+            Message.CONTRACT_DISPUTED.format("contract-name", name, "who", employee.equals(middlemanDisputeCaller.getUUID(this)) ? "You" : employerPlayer.getName())
                     .send(employeePlayer.getPlayer());
         if (employerPlayer != null)
-            Message.CONTRACT_DISPUTED.format("contract-name", name, "who", employer.equals(middlemanDisputeCaller) ? "You" : employeePlayer.getName())
+            Message.CONTRACT_DISPUTED.format("contract-name", name, "who", employer.equals(middlemanDisputeCaller.getUUID(this)) ? "You" : employeePlayer.getName())
                     .send(employerPlayer.getPlayer());
+
+        Player disputeCaller = middlemanDisputeCaller == ContractParties.EMPLOYEE ? employeePlayer : employerPlayer;
+        Message.PAID_COMMISSION.format("commission", amount * Contracts.plugin.configManager.middlemanCommission / 100).send(disputeCaller);
         Contracts.plugin.middlemenManager.assignToRandomMiddleman(this);
     }
 
@@ -429,10 +436,48 @@ public abstract class Contract {
         PlayerData employerData = PlayerData.getOrLoad(employer);
         Player employeePlayer = Bukkit.getPlayer(employee);
         Contracts.plugin.economy.depositPlayer(Bukkit.getOfflinePlayer(employee), guarantee + amount);
+
         if (employeePlayer != null)
             Message.EMPLOYEE_CONTRACT_ENDED.format("employer", employerData.getPlayerName(), "contract-name", getName(), "amount", amount, "guarantee", guarantee).send(employeePlayer);
-
         Message.EMPLOYER_CONTRACT_ENDED.format("employee", Bukkit.getOfflinePlayer(employee).getName(), "contract-name", getName(), "amount", amount).send(employerData.getPlayer());
+    }
+
+    /**
+     *
+     */
+    public void whenResolved() {
+        Player employerPlayer = Bukkit.getPlayer(employer);
+        Player employeePlayer = Bukkit.getPlayer(employee);
+        changeContractState(ContractState.RESOLVED);
+        Contracts.plugin.economy.depositPlayer(Bukkit.getOfflinePlayer(employee), guarantee + amount);
+        if (employeePlayer != null)
+            Message.EMPLOYEE_CONTRACT_RESOLVED.format("employer", Bukkit.getOfflinePlayer(employer).getName(), "contract-name", getName(), "amount", amount, "guarantee", guarantee).send(employeePlayer);
+        if (employerPlayer != null)
+            Message.EMPLOYER_CONTRACT_RESOLVED.format("employee", Bukkit.getOfflinePlayer(employee).getName(), "contract-name", getName(), "amount", amount).send(employerPlayer);
+    }
+
+    public void whenResolvedFromDispute() {
+        OfflinePlayer employerPlayer = Bukkit.getOfflinePlayer(employer);
+        OfflinePlayer employeePlayer = Bukkit.getOfflinePlayer(employee);
+        OfflinePlayer middlemanPlayer = Bukkit.getOfflinePlayer(middleman);
+        changeContractState(ContractState.RESOLVED);
+        double commissionRate = Contracts.plugin.configManager.middlemanCommission / 100;
+        double commission = (amount) * commissionRate;
+        Contracts.plugin.economy.depositPlayer(middlemanPlayer, commission);
+        Contracts.plugin.economy.depositPlayer(employeePlayer, middlemanAmount + guarantee);
+        Contracts.plugin.economy.depositPlayer(employerPlayer, -middlemanAmount + amount);
+        if (employeePlayer.getPlayer() != null)
+            Message.EMPLOYEE_CONTRACT_RESOLVED.format("employer", Bukkit.getOfflinePlayer(employer).getName(), "contract-name", getName(), "amount", middlemanAmount, "guarantee", guarantee).send(employeePlayer.getPlayer());
+        if (employerPlayer.getPlayer() != null)
+            Message.EMPLOYER_CONTRACT_RESOLVED.format("employee", Bukkit.getOfflinePlayer(employee).getName(), "contract-name", getName(), "amount", middlemanAmount).send(employerPlayer.getPlayer());
+        if (middlemanPlayer.getPlayer() != null)
+            Message.MIDDLEMAN_RESOLVED.format("contract-name", getName(), "commission", commission).send(middlemanPlayer.getPlayer());
+    }
+
+
+    public void whenDecidedByMiddleman(double amount) {
+        changeContractState(ContractState.MIDDLEMAN_RESOLVED);
+        middlemanAmount = amount;
     }
 
 
@@ -453,8 +498,8 @@ public abstract class Contract {
         Player employeePlayer = Bukkit.getPlayer(employee);
         Player employerPlayer = Bukkit.getPlayer(employer);
         //Deposit the right amount of money to the 2 parts.
-        Contracts.plugin.economy.depositPlayer(Bukkit.getOfflinePlayer(employee), lastOffer+guarantee);
-        Contracts.plugin.economy.depositPlayer(Bukkit.getOfflinePlayer(employer),amount-lastOffer);
+        Contracts.plugin.economy.depositPlayer(Bukkit.getOfflinePlayer(employee), lastOffer + guarantee);
+        Contracts.plugin.economy.depositPlayer(Bukkit.getOfflinePlayer(employer), amount - lastOffer);
         if (employeePlayer != null)
             Message.EMPLOYEE_CONTRACT_ENDED.format("employer", Bukkit.getOfflinePlayer(employer).getName(), "contract-name", getName(), "amount", amount, "guarantee", guarantee).send(employeePlayer);
         if (employerPlayer != null)
@@ -521,7 +566,13 @@ public abstract class Contract {
             return;
         }
         proposals.add(new Proposal(this, proposingPlayer, PlayerData.getOrLoad(employer), System.currentTimeMillis()));
+    Player employerPlayer=PlayerData.getOrLoad(employer).getPlayer();
+    if(employerPlayer!=null)
+        Message.OFFER_RECEIVED.format("other",proposingPlayer.getPlayerName(),"contract-name",getName()).send(employerPlayer);
+    Message.OFFER_CREATED.format("other",PlayerData.getOrLoad(employer).getPlayerName(),
+            "contract-name",getName(),"guarantee",guarantee).send(proposingPlayer.getPlayer());
     }
+
 
 
     public Placeholders getContractPlaceholder(PlayerData playerData) {
@@ -550,11 +601,12 @@ public abstract class Contract {
         PlayerData employer = PlayerData.getOrLoad(getEmployer());
         holders.register("employer-reputation", ContractsUtils.formatNotation(employer.getMeanNotation()));
         holders.register("employer-total-reviews", employer.getNumberReviews());
-        holders.register("payment", "" + getAmount());
-        holders.register("guarantee", "" + getGuarantee());
+        holders.register("payment", Contracts.plugin.configManager.decimalFormat.format(getAmount()));
+        holders.register("guarantee", Contracts.plugin.configManager.decimalFormat.format(getGuarantee()));
+        holders.register("deadline", Contracts.plugin.configManager.decimalFormat.format(getDeadLine()));
         PlayerData other = getOther(playerData);
         if (other != null) {
-            holders.register("has-made-review",other.hasReceivedReviewFor(this));
+            holders.register("has-made-review", other.hasReceivedReviewFor(this));
             holders.register("other", other.getPlayerName());
             holders.register("other-reputation", ContractsUtils.formatNotation(employer.getMeanNotation()));
             holders.register("other-total-reviews", other.getNumberReviews());

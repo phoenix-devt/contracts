@@ -32,6 +32,7 @@ public class Contracts extends JavaPlugin {
 
     @Override
     public void onEnable() {
+
         // Metrics data
         new Metrics(this, 15383);
 

@@ -1,6 +1,6 @@
 package fr.phoenix.contracts.command.admin;
 
-import fr.phoenix.contracts.command.admin.middleman.MiddlemanTreeNode;
+import fr.phoenix.contracts.command.admin.middleman.AdminMiddlemanTreeNode;
 import fr.phoenix.contracts.command.objects.CommandTreeNode;
 import org.bukkit.command.CommandSender;
 
@@ -13,7 +13,7 @@ public class AdminCommandTreeNode extends CommandTreeNode {
      */
     public AdminCommandTreeNode(CommandTreeNode parent) {
         super(parent, "admin");
-        addChild(new MiddlemanTreeNode(this));
+        addChild(new AdminMiddlemanTreeNode(this));
     }
 
     @Override
